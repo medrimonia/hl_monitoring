@@ -1,0 +1,54 @@
+cmake_minimum_required(VERSION 2.8)
+project(hl_monitoring)
+
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
+
+find_package(catkin REQUIRED COMPONENTS
+  hl_communication
+  )
+
+# Handling generated headers is based on Dirk Thomas answer on topic:
+# - https://answers.ros.org/answers/123416/revisions/
+catkin_destinations()
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+set (PROTOBUF_MESSAGES
+  proto/camera.proto
+  )
+
+protobuf_generate_cpp(PROTO_SOURCES PROTO_HEADERS ${PROTOBUF_MESSAGES})
+
+set_source_files_properties(${PROTO_SOURCES} ${PROTO_HEADERS} PROPERTIES GENERATED TRUE)
+
+add_custom_target(${PROJECT_NAME}_generate_headers ALL
+  COMMAND cp ${PROTO_HEADERS} ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DEPENDS ${PROTO_HEADERS}
+  )
+
+set(${PROJECT_NAME}_EXPORTED_TARGETS ${PROJECT_NAME}_generate_headers)
+
+catkin_package(
+  INCLUDE_DIRS include ${PROTOBUF_INCLUDE_DIR} ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  LIBRARIES ${PROJECT_NAME} ${PROTOBUF_LIBRARY}
+  )
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+
+set(SOURCES_DIRECTORIES
+  src/hl_monitoring
+  )
+
+#Include Sources sub sources
+foreach (DIRECTORY ${SOURCES_DIRECTORIES})
+    include (${DIRECTORY}/sources.cmake)
+    set (PREFIXED_SOURCES)
+    foreach (SOURCE ${SOURCES})
+        set (PREFIXED_SOURCES ${PREFIXED_SOURCES} ${DIRECTORY}/${SOURCE})
+    endforeach (SOURCE)
+    set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
+endforeach (DIRECTORY)
+
+#Build the kid_size main library
+add_library (${PROJECT_NAME} SHARED ${PROTO_SOURCES} ${ALL_SOURCES})
+target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
