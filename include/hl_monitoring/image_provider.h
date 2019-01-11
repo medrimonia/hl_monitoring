@@ -1,20 +1,17 @@
 #pragma once
 
+#include "hl_monitoring/calibrated_image.h"
+
 namespace hl_monitoring
 {
 
 class ImageProvider {
 public:
-
-  /**
-   * Return the extrinsic and intrinsic
-   */
-  std::pair<CameraState, cv::Mat> getEntry(double time_stamp) const;
   
-private:
-  std::map<double, cv::Mat> images;
-
-  CameraState camera_state;
+  /**
+   * Return an image along with associated intrinsic and extrinsic parameters
+   */
+  virtual CalibratedImage getCalibratedImage(double time_stamp) = 0;
 };
 
 }

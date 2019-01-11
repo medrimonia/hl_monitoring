@@ -50,15 +50,7 @@ message Pose3D {
   repeated float translation = 2;
 }
 
-message StaticCamera {
-  required IntrinsicParameters parameters = 1;
-  /**
-   * The transformation from field referential to camera referential
-   */
-  required Pose3D field_to_camera = 2;
-}
-
-message TimedPose3D {
+message FrameEntry {
   /**
    * Time at which the pose was measured or estimated
    */
@@ -66,20 +58,20 @@ message TimedPose3D {
   /**
    * The transformation from field referential to camera referential
    */
-  required Pose3D field_to_camera = 2;
+  optional Pose3D pose = 2;
 }
 
-message DynamicCamera {
-  required IntrinsicParameters parameters = 1;
+message VideoMetaInformation {
   /**
-   * Collection of poses associated with time_stamps
+   * Intrinsic parameters of the camera
    */
-  repeated TimedPose3D poses = 2;
-}
-
-message CameraState {
-  oneof state {
-    StaticCamera static_config = 1;
-    DynamicCamera dynamic_config = 2;
-  }
+  optional IntrinsicParameters camera_parameters = 1;
+  /**
+   * Default pose of the camera if no pose is provided for a frame
+   */
+  optional Pose3D default_pose = 2;
+  /**
+   * Contains information about each frame of the video
+   */
+  repeated FrameEntry frames = 3;
 }
