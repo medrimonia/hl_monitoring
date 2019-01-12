@@ -6,11 +6,20 @@
 
 /**
  * Contains multiple conversion tools from hl_communication protobuf format to
- * OpenCV classical format
+ * OpenCV classical format and debug tools
  */
 
 namespace hl_monitoring
 {
+
+#define HL_MONITOR_DEBUG                        \
+  (std::string(__FUNCTION__) + ":"              \
+   + hl_monitoring::getBaseName(__FILE__) + ":" \
+   + std::to_string(__LINE__)  + ": ")
+
+/// Return the name of the file at the given path:
+/// e.g getBaseName("toto/file.cpp") returns "file.cpp"
+std::string getBaseName(const std::string & path);
 
 void intrinsicToCV(const IntrinsicParameters & camera_parameters,
                    cv::Mat * camera_matrix,

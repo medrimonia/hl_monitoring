@@ -67,6 +67,9 @@ target_link_libraries(${PROJECT_NAME} ${LINKED_LIBRARIES})
 option(BUILD_HL_MONITORING_TOOLS "Building hl_monitoring tools" OFF)
 
 if (BUILD_HL_MONITORING_TOOLS)
+  add_executable(intrinsic_calibration tools/intrinsic_calibration.cpp)
+  target_link_libraries(intrinsic_calibration ${PROJECT_NAME} ${LINKED_LIBRARIES})
+
   add_executable(static_calibration tools/static_calibration.cpp)
   target_link_libraries(static_calibration ${PROJECT_NAME} ${LINKED_LIBRARIES})
 endif()

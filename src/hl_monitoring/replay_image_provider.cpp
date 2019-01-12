@@ -1,24 +1,37 @@
 #include "hl_monitoring/replay_image_provider.h"
 
+#include "hl_monitoring/utils.h"
+
 #include <fstream>
 
 namespace hl_monitoring
 {
 
-ReplayImageProvider::ReplayImageProvider() {
+ReplayImageProvider::ReplayImageProvider()
+  : index(0), nb_frames(0)
+{
+}
+
+ReplayImageProvider::ReplayImageProvider(const std::string & video_path)
+{
+  loadVideo(video_path);
 }
 
 ReplayImageProvider::ReplayImageProvider(const std::string & video_path,
                                          const std::string & meta_information_path) {
-  load(video_path, meta_information_path);
+  loadVideo(video_path);
+  loadMetaInformation(meta_information_path);
 }
 
-void ReplayImageProvider::load(const std::string & video_path,
-                               const std::string & meta_information_path) {
-  
+void ReplayImageProvider::loadVideo(const std::string & video_path) {
   if (!video.open(video_path)) {
     throw std::runtime_error("Failed to open video '" + video_path + "'");
   }
+  index = 0;
+  nb_frames = video.get(cv::CAP_PROP_FRAME_COUNT);
+}
+
+void ReplayImageProvider::loadMetaInformation(const std::string & meta_information_path) {
   std::ifstream in(meta_information_path, std::ios::binary);
   if (!in.good()) {
     throw std::runtime_error("Failed to open file '" + meta_information_path + "'");
@@ -28,16 +41,17 @@ void ReplayImageProvider::load(const std::string & video_path,
   }
 }
 
-CalibratedImage ReplayImageProvider::getCalibratedImage(double time_stamp) {
-  int index = getIndex(time_stamp);
+void ReplayImageProvider::restartStream() {
+  setIndex(0);
+}
 
-  if (!video.set(cv::CAP_PROP_POS_FRAMES, index)) {
-    throw std::runtime_error("Failed to set index to " + std::to_string(index) + " in video");
-  }
+CalibratedImage ReplayImageProvider::getCalibratedImage(double time_stamp) {
+  setIndex(getIndex(time_stamp));
+
   cv::Mat img;
   video.read(img);
   if (img.empty()) {
-    throw std::runtime_error("Blank frame has been read");
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Blank frame has been read");
   }
   
   IntrinsicParameters intrinsic_parameters;
@@ -60,6 +74,32 @@ CalibratedImage ReplayImageProvider::getCalibratedImage(double time_stamp) {
   return CalibratedImage(img, camera_pose, intrinsic_parameters);
 }
 
+cv::Mat ReplayImageProvider::getNextImg() {
+  if (isStreamFinished()) {
+    throw std::logic_error("Asking for a new frame while stream is finished");
+  }
+
+  cv::Mat img;
+  video.read(img);
+  index++;
+  if (img.empty()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Blank frame at frame: "
+                             + std::to_string(index) + "/" + std::to_string(nb_frames));
+  }
+  return img;
+}
+
+bool ReplayImageProvider::isStreamFinished() {
+  return index >= nb_frames;
+}
+
+void ReplayImageProvider::setIndex(int new_index) {
+  index = new_index;
+  if (!video.set(cv::CAP_PROP_POS_FRAMES, index)) {
+    throw std::runtime_error(HL_MONITOR_DEBUG +"Failed to set index to "
+                             + std::to_string(index) + " in video");
+  }
+}
 int ReplayImageProvider::getIndex(double time_stamp) const {
   if (indices_by_time_stamp.size() == 0) {
     throw std::runtime_error("indices_by_time_stamp is empty");
