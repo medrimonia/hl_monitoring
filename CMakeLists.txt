@@ -4,6 +4,8 @@ project(hl_monitoring)
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
 
+find_package(OpenCV REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   hl_communication
   )
@@ -33,7 +35,12 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME} ${PROTOBUF_LIBRARY}
   )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  ${OpenCV_DIR}
+  )
 
 set(SOURCES_DIRECTORIES
   src/hl_monitoring
@@ -41,14 +48,25 @@ set(SOURCES_DIRECTORIES
 
 #Include Sources sub sources
 foreach (DIRECTORY ${SOURCES_DIRECTORIES})
-    include (${DIRECTORY}/sources.cmake)
-    set (PREFIXED_SOURCES)
-    foreach (SOURCE ${SOURCES})
-        set (PREFIXED_SOURCES ${PREFIXED_SOURCES} ${DIRECTORY}/${SOURCE})
-    endforeach (SOURCE)
-    set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
+  include (${DIRECTORY}/sources.cmake)
+  set (PREFIXED_SOURCES)
+  foreach (SOURCE ${SOURCES})
+    set (PREFIXED_SOURCES ${PREFIXED_SOURCES} ${DIRECTORY}/${SOURCE})
+  endforeach (SOURCE)
+  set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
 endforeach (DIRECTORY)
+
+
+set(LINKED_LIBRARIES ${catkin_LIBRARIES} ${PROTOBUF_LIBRARIES} ${OpenCV_LIBS})
 
 #Build the kid_size main library
 add_library (${PROJECT_NAME} SHARED ${PROTO_SOURCES} ${ALL_SOURCES})
-target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${LINKED_LIBRARIES})
+
+
+option(BUILD_HL_MONITORING_TOOLS "Building hl_monitoring tools" OFF)
+
+if (BUILD_HL_MONITORING_TOOLS)
+  add_executable(static_calibration tools/static_calibration.cpp)
+  target_link_libraries(static_calibration ${PROJECT_NAME} ${LINKED_LIBRARIES})
+endif()

@@ -14,7 +14,7 @@ class CalibratedImage {
 public:
 
   CalibratedImage(const cv::Mat & img,
-                  const Pose3D pose,
+                  const Pose3D & pose,
                   const IntrinsicParameters & camera_parameters);
 
 private:

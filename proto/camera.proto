@@ -37,15 +37,11 @@ message IntrinsicParameters {
 
 message Pose3D {
   /**
-   * Two valid options:
-   * Size 0: unknown information
-   * Size 4: quaternion [w,x,y,z]
+   * Size 3: Rotation vector (based on Rodrigues rotation)
    */ 
   repeated float rotation = 1;
   /**
-   * Two valid options:
-   * Size 0: unknown information
-   * Size 3: [tx,ty,tz]
+   * [tx,ty,tz]
    */
   repeated float translation = 2;
 }
