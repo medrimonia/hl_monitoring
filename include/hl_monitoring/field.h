@@ -1,5 +1,6 @@
 #pragma once
 
+#include <opencv2/core.hpp>
 #include <json/json.h>
 
 namespace hl_monitoring {
@@ -43,41 +44,81 @@ public:
   Json::Value toJson() const;
   void fromJson(const Json::Value & v);
 
-  /// Radius of the ball [m]
-  double ballRadius;
+  const std::map<std::string, cv::Point3f> & getPointsOfInterest() const;
 
-  /// The width of white lines [m]
-  double lineWidth;
+  /*
+   * Radius of the ball [m]
+   */
+  double ball_radius;
 
-  /// Radius of the central circle (lines included) [m]
-  double centerRadius;
+  /*
+   *  The width of white lines [m]
+   */
+  double line_width;
 
-  /// Distance from fieldBorder to arenaBorder (line excluded) [m]
-  double borderStripWidth;
+  /*
+   *  Radius of the central circle (lines included) [m]
+   */
+  double center_radius;
 
-  /// Distance from center of penaltyMark to closest goal (goal line included) [m]
-  double penaltyMarkDist;
+  /*
+   *  Distance from fieldBorder to arenaBorder (line excluded) [m]
+   */
+  double border_strip_width;
 
-  /// Length of the penalty mark [m]
-  double penaltyMarkLength;
+  /*
+   *  Distance from center of penaltyMark to closest goal (goal line included) [m]
+   */
+  double penalty_mark_dist;
 
-  /// Distance between two posts (posts excluded) [m]
-  double goalWidth;
+  /*
+   *  Length of the penalty mark [m]
+   */
+  double penalty_mark_length;
 
-  /// From goal line to the back of the goal (goal line included) [m]
-  double goalDepth;
+  /*
+   *  Distance between two posts (posts excluded) [m]
+   */
+  double goal_width;
 
-  /// From goal line to goal area line (lines included) [m]
-  double goalAreaLength;
+  /*
+   *  From goal line to the back of the goal (goal line included) [m]
+   */
+  double goal_depth;
 
-  /// From one side of goal area to the other (lines included) [m]
-  double goalAreaWidth;
+  /*
+   *  From goal line to goal area line (lines included) [m]
+   */
+  double goal_area_length;
 
-  /// From one goal line to the other (lines included) [m]
-  double fieldLength;
+  /*
+   *  From one side of goal area to the other (lines included) [m]
+   */
+  double goal_area_width;
 
-  /// From one side of the field to the other (lines included) [m]
-  double fieldWidth;
+  /*
+   *  From one goal line to the other (lines included) [m]
+   */
+  double field_length;
+
+  /*
+   *  From one side of the field to the other (lines included) [m]
+   */
+  double field_width;
+  
+
+  /**
+   * Synchronize the points of interests with current size of the field
+   */
+  void updatePointsOfInterest();
+
+private:
+  
+  /**
+   * Stores points of interest visually identifiable of the field along with a given name
+   * e.g.: corners penalty marks etc...
+   */
+  std::map<std::string, cv::Point3f> points_of_interest;
 };
 
 }

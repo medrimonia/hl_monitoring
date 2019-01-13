@@ -18,6 +18,7 @@ public:
   StaticCalibrationTool(std::unique_ptr<ImageProvider> provider)
     : image_provider(std::move(provider)), is_good(true)
     {
+      image_provider->restartStream();
       //TODO:
       // - Set cursor on first frame
       // - import points from 'Field' object
