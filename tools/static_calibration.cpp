@@ -23,14 +23,13 @@ using namespace hl_monitoring;
 class StaticCalibrationTool {
 public:
   StaticCalibrationTool(const cv::Mat & img,
-                        std::unique_ptr<Field> field,
+                        std::unique_ptr<Field> field_,
                         const IntrinsicParameters & camera_parameters)
-    : calib_img(img), is_good(true), point_index(0)
+    : field(std::move(field_)), calib_img(img), is_good(true), point_index(0)
     {
       intrinsicToCV(camera_parameters, &camera_matrix, &distortion_coefficients, &img_size);
 
       for (const auto & entry : field->getPointsOfInterest()) {
-        std::cout << "Adding point '" << entry.first << "' -> " << entry.second << std::endl;
         points_names.push_back(entry.first);
         points_in_world.push_back(entry.second);
       }
@@ -58,7 +57,6 @@ public:
     }
     points_in_img[point_index] = cv::Point(x,y);
     if (points_in_img.size() >= 4) {
-      cv::Mat tvec, rvec;
       std::vector<cv::Point3f> object_points;
       std::vector<cv::Point2f> img_points;
       for (const auto & entry : points_in_img) {
@@ -66,6 +64,7 @@ public:
         img_points.push_back(entry.second);
       }
       std::cout  << "camera_matrix.size" << camera_matrix.size() << std::endl;
+      std::cout  << "distortion_coeffs.size" << distortion_coefficients.size() << std::endl;
       cv::solvePnP(object_points, img_points, camera_matrix, distortion_coefficients, rvec, tvec);
     }
     point_index++;
@@ -87,6 +86,18 @@ public:
     for (const auto & entry : points_in_img) {
       cv::circle(display_img, entry.second, 5, cv::Scalar(0,0,0), -1);
     }
+    if (points_in_img.size() >= 4) {
+      std::cout << "nb white lines: " << field->getWhiteLines().size() << std::endl;
+      for (const auto & segment : field->getWhiteLines()) {
+        std::vector<cv::Point3f> object_points = {segment.first, segment.second};
+        std::vector<cv::Point2f> img_points;
+        cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coefficients,
+                          img_points);
+        std::cout << "line_obj: " << object_points[0] << " -> " << object_points[1] << std::endl;
+        std::cout << "line: " << img_points[0] << " -> " << img_points[1] << std::endl;
+        cv::line(display_img, img_points[0], img_points[1], cv::Scalar(0,0,0), 6);
+      }
+    }
     cv::imshow("display", display_img);
     char key = cv::waitKey(30);
     switch (key) {
@@ -98,18 +109,9 @@ public:
         printTagRequest();
     }
     //TODO
-    // - Draw manual input points
     // - If pose is available: draw field
-    // - Wait for key (30 ms)
     // - Handle key
-    //   - q/esc: set is_good to false
     //   - backspace: remove last point in the list
-  }
-
-  void onClick() {
-    // - Add point
-    // - Update index
-    // - If enough points, update pose
   }
 
   void saveMetaInformation(const std::string & path) {

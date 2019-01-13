@@ -66,6 +66,7 @@ void Field::fromJson(const Json::Value & v) {
   field_length        = read(v,"field_length"       );
   field_width         = read(v,"field_width"        );
   updatePointsOfInterest();
+  updateWhiteLines();
 }
 
 void Field::loadFile(const std::string & path) {
@@ -82,6 +83,11 @@ const std::map<std::string, cv::Point3f> & Field::getPointsOfInterest() const {
   return points_of_interest;
 }
 
+const std::vector<Field::Segment> & Field::getWhiteLines() const {
+  return white_lines;
+}
+
+
 void Field::updatePointsOfInterest() {
   points_of_interest.clear();
   points_of_interest["center"] = cv::Point3f(0, 0, 0);
@@ -91,8 +97,8 @@ void Field::updatePointsOfInterest() {
   points_of_interest["field_corner+-"] = cv::Point3f( fc_x, -fc_y, 0);
   points_of_interest["field_corner-+"] = cv::Point3f(-fc_x,  fc_y, 0);
   points_of_interest["field_corner--"] = cv::Point3f(-fc_x, -fc_y, 0);
-  double gac_x = field_length / 2 - goal_area_width;
-  double gac_y = field_width / 2 - goal_area_length;
+  double gac_x = field_length / 2 - goal_area_length;
+  double gac_y = goal_area_width/2;
   points_of_interest["goal_area_corner++"] = cv::Point3f( gac_x,  gac_y, 0);
   points_of_interest["goal_area_corner+-"] = cv::Point3f( gac_x, -gac_y, 0);
   points_of_interest["goal_area_corner-+"] = cv::Point3f(-gac_x,  gac_y, 0);
@@ -104,5 +110,18 @@ void Field::updatePointsOfInterest() {
   points_of_interest["middle_line_t+"] = cv::Point3f(0,  mlt_y, 0);
   points_of_interest["middle_line_t-"] = cv::Point3f(0, -mlt_y, 0);
 }
+
+void Field::updateWhiteLines() {
+  white_lines.clear();
+  white_lines.push_back({points_of_interest["field_corner++"],
+        points_of_interest["field_corner+-"]});
+  white_lines.push_back({points_of_interest["field_corner+-"],
+        points_of_interest["field_corner--"]});
+  white_lines.push_back({points_of_interest["field_corner--"],
+        points_of_interest["field_corner-+"]});
+  white_lines.push_back({points_of_interest["field_corner-+"],
+        points_of_interest["field_corner++"]});
+}
+
 
 }

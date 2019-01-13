@@ -39,6 +39,9 @@ namespace hl_monitoring {
  */
 class Field {
 public:
+
+  typedef std::pair<cv::Point3f, cv::Point3f> Segment;
+
   Field();
 
   Json::Value toJson() const;
@@ -46,6 +49,7 @@ public:
   void loadFile(const std::string & path);
 
   const std::map<std::string, cv::Point3f> & getPointsOfInterest() const;
+  const std::vector<Segment> & getWhiteLines() const;
 
   /*
    * Radius of the ball [m]
@@ -108,18 +112,28 @@ public:
   double field_width;
   
 
+private:
+  
   /**
    * Synchronize the points of interests with current size of the field
    */
   void updatePointsOfInterest();
-
-private:
   
+  /**
+   * Synchronize the white lines based on the points of interests
+   */
+  void updateWhiteLines();
+
   /**
    * Stores points of interest visually identifiable of the field along with a given name
    * e.g.: corners penalty marks etc...
    */
   std::map<std::string, cv::Point3f> points_of_interest;
+
+  /**
+   * List all the white segments in the field
+   */
+  std::vector<Segment> white_lines;
 };
 
 }
