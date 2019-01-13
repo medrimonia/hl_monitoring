@@ -3,6 +3,8 @@ project(hl_monitoring)
 
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
 
 find_package(OpenCV REQUIRED)
 
@@ -30,17 +32,26 @@ add_custom_target(${PROJECT_NAME}_generate_headers ALL
 
 set(${PROJECT_NAME}_EXPORTED_TARGETS ${PROJECT_NAME}_generate_headers)
 
-catkin_package(
-  INCLUDE_DIRS include ${PROTOBUF_INCLUDE_DIR} ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-  LIBRARIES ${PROJECT_NAME} ${PROTOBUF_LIBRARY}
-  )
+message(WARNING "Jsoncpp found: ${JSONCPP_FOUND}")
+message(WARNING "Jsoncpp include dirs: ${JSONCPP_INCLUDE_DIRS}")
+message(WARNING "Jsoncpp libraries: ${JSONCPP_LIBRARIES}")
 
-include_directories(
+set(DELEGATE_INCLUDE_DIRS
   include
-  ${catkin_INCLUDE_DIRS}
   ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
   ${OpenCV_DIR}
+  ${JSONCPP_INCLUDE_DIRS})
+
+set(DELEGATE_LIBRARIES
+  ${OpenCV_LIBS}
+  ${JSONCPP_LIBRARIES})
+
+catkin_package(
+  INCLUDE_DIRS ${DELEGATE_INCLUDE_DIRS}
+  LIBRARIES ${PROJECT_NAME} ${DELEGATE_LIBRARIES}
   )
+
+include_directories(${DELEGATE_INCLUDE_DIRS} ${catkin_INCLUDR_DIRS} )
 
 set(SOURCES_DIRECTORIES
   src/hl_monitoring
@@ -57,7 +68,7 @@ foreach (DIRECTORY ${SOURCES_DIRECTORIES})
 endforeach (DIRECTORY)
 
 
-set(LINKED_LIBRARIES ${catkin_LIBRARIES} ${PROTOBUF_LIBRARIES} ${OpenCV_LIBS})
+set(LINKED_LIBRARIES ${catkin_LIBRARIES} ${DELEGATE_LIBRARIES})
 
 #Build the kid_size main library
 add_library (${PROJECT_NAME} SHARED ${PROTO_SOURCES} ${ALL_SOURCES})

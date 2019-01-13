@@ -2,11 +2,12 @@
 
 #include "hl_monitoring/camera.pb.h"
 
+#include <json/json.h>
 #include <opencv2/core.hpp>
 
 /**
  * Contains multiple conversion tools from hl_communication protobuf format to
- * OpenCV classical format and debug tools
+ * OpenCV classical format and other utilities functions
  */
 
 namespace hl_monitoring
@@ -17,8 +18,10 @@ namespace hl_monitoring
    + hl_monitoring::getBaseName(__FILE__) + ":" \
    + std::to_string(__LINE__)  + ": ")
 
-/// Return the name of the file at the given path:
-/// e.g getBaseName("toto/file.cpp") returns "file.cpp"
+/**
+ * Return the name of the file at the given path:
+ * e.g getBaseName("toto/file.cpp") returns "file.cpp"
+ */
 std::string getBaseName(const std::string & path);
 
 void intrinsicToCV(const IntrinsicParameters & camera_parameters,
