@@ -2,6 +2,8 @@
 
 #include "hl_monitoring/utils.h"
 
+#include <fstream>
+
 namespace hl_monitoring {
 
 static double read(const Json::Value & v, const std::string & key) {  
@@ -11,10 +13,10 @@ static double read(const Json::Value & v, const std::string & key) {
   if (!v.isMember(key)) {
     throw std::runtime_error(HL_MONITOR_DEBUG + " v has no key '" + key + "'");
   }
-  if (!v.isDouble()) {
+  if (!v[key].isDouble()) {
     throw std::runtime_error(HL_MONITOR_DEBUG + " v[" + key + "] is not a double");
   }
-  return v.asDouble();
+  return v[key].asDouble();
 }
 
 Field::Field() {
@@ -63,6 +65,17 @@ void Field::fromJson(const Json::Value & v) {
   goal_area_width     = read(v,"goal_area_width"    );
   field_length        = read(v,"field_length"       );
   field_width         = read(v,"field_width"        );
+  updatePointsOfInterest();
+}
+
+void Field::loadFile(const std::string & path) {
+  std::ifstream in(path);
+  if (!in.good()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '" + path + "'");
+  }
+  Json::Value root;
+  in >> root;
+  fromJson(root);
 }
 
 const std::map<std::string, cv::Point3f> & Field::getPointsOfInterest() const {

@@ -15,7 +15,7 @@ void intrinsicToCV(const IntrinsicParameters & camera_parameters,
                    cv::Mat * camera_matrix,
                    cv::Mat * distortion_coefficients,
                    cv::Size * img_size) {
-  camera_matrix = new cv::Mat(3,3,CV_32F);
+  *camera_matrix = cv::Mat(3,3,CV_32F);
   camera_matrix->at<float>(0,0) = camera_parameters.focal_x();
   camera_matrix->at<float>(1,1) = camera_parameters.focal_y();
   camera_matrix->at<float>(0,2) = camera_parameters.center_x();
@@ -23,7 +23,7 @@ void intrinsicToCV(const IntrinsicParameters & camera_parameters,
   camera_matrix->at<float>(2,2) = 1.0;
   img_size->width = camera_parameters.img_width();
   img_size->height = camera_parameters.img_height();
-  distortion_coefficients = new cv::Mat(1,camera_parameters.distortion_size(), CV_32F);
+  *distortion_coefficients = cv::Mat(1,camera_parameters.distortion_size(), CV_32F);
   for (int i = 0; i < camera_parameters.distortion_size(); i++) {
     distortion_coefficients->at<float>(i,0) = camera_parameters.distortion(i);
   }
@@ -55,8 +55,8 @@ void pose3DToCV(const Pose3D & pose,
   if (pose.translation_size() != 3) {
     throw std::runtime_error("Size of translation in Pose3D is not valid (only 3 is accepted)");
   }
-  rvec = new cv::Mat(3,3,CV_32F);
-  tvec = new cv::Mat(3,3,CV_32F);
+  *rvec = cv::Mat(3,3,CV_32F);
+  *tvec = cv::Mat(3,3,CV_32F);
   for (int i=0; i<3; i++) {
     rvec->at<float>(i,0) = pose.rotation(i);
     tvec->at<float>(i,0) = pose.translation(i);

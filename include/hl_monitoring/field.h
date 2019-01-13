@@ -43,6 +43,7 @@ public:
 
   Json::Value toJson() const;
   void fromJson(const Json::Value & v);
+  void loadFile(const std::string & path);
 
   const std::map<std::string, cv::Point3f> & getPointsOfInterest() const;
 
