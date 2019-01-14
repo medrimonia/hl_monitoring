@@ -22,11 +22,12 @@ using namespace hl_monitoring;
 
 class StaticCalibrationTool {
 public:
-  StaticCalibrationTool(const cv::Mat & img,
+  StaticCalibrationTool(std::unique_ptr<ImageProvider> provider_,
                         std::unique_ptr<Field> field_,
                         const IntrinsicParameters & camera_parameters)
-    : field(std::move(field_)), calib_img(img), is_good(true), point_index(0)
+    : provider(std::move(provider_)),field(std::move(field_)), is_good(true), point_index(0)
     {
+      calib_img = provider->getNextImg();
       intrinsicToCV(camera_parameters, &camera_matrix, &distortion_coefficients, &img_size);
 
       for (const auto & entry : field->getPointsOfInterest()) {
@@ -41,11 +42,25 @@ public:
                              StaticCalibrationTool * tool = (StaticCalibrationTool *)param;
                              tool->onClick(event, x, y, param);
                            }, this);
-      printTagRequest();
+      std::cout << getTagRequest() << std::endl;
     }
 
   bool isGood() {
     return is_good;
+  }
+
+  void updatePose() {
+    if (points_in_img.size() < 4) {
+      return;
+    }
+    std::vector<cv::Point3f> object_points;
+    std::vector<cv::Point2f> img_points;
+    for (const auto & entry : points_in_img) {
+      cv::Point3f obj_point = points_in_world[entry.first];
+      object_points.push_back(obj_point);
+      img_points.push_back(entry.second);
+    }
+    cv::solvePnP(object_points, img_points, camera_matrix, distortion_coefficients, rvec, tvec);
   }
 
   void onClick(int event, int x, int y, void * param) {
@@ -56,28 +71,19 @@ public:
       return;
     }
     points_in_img[point_index] = cv::Point(x,y);
-    if (points_in_img.size() >= 4) {
-      std::vector<cv::Point3f> object_points;
-      std::vector<cv::Point2f> img_points;
-      for (const auto & entry : points_in_img) {
-        object_points.push_back(points_in_world[entry.first]);
-        img_points.push_back(entry.second);
-      }
-      std::cout  << "camera_matrix.size" << camera_matrix.size() << std::endl;
-      std::cout  << "distortion_coeffs.size" << distortion_coefficients.size() << std::endl;
-      cv::solvePnP(object_points, img_points, camera_matrix, distortion_coefficients, rvec, tvec);
-    }
+    updatePose();
     point_index++;
-    printTagRequest();
+    std::cout << getTagRequest() << std::endl;
   }
 
-  void printTagRequest() {
-    if (point_index < (int) points_in_world.size()) {
-      std::cout << "Click on point '" << points_names[point_index] << "', pos in world: "
-                << points_in_world[point_index] << std::endl;
-    } else {
-      std::cout << "All points have been tagged" << std::endl;
+  std::string getTagRequest() {
+    if (point_index >= (int) points_in_world.size()) {
+      return "All points have been tagged";
     }
+    std::ostringstream oss;
+    oss << "Click on point '" << points_names[point_index] << "', pos in world: "
+        << points_in_world[point_index];
+    return oss.str();
   }
 
   // Main loop
@@ -87,26 +93,42 @@ public:
       cv::circle(display_img, entry.second, 5, cv::Scalar(0,0,0), -1);
     }
     if (points_in_img.size() >= 4) {
-      std::cout << "nb white lines: " << field->getWhiteLines().size() << std::endl;
       for (const auto & segment : field->getWhiteLines()) {
         std::vector<cv::Point3f> object_points = {segment.first, segment.second};
         std::vector<cv::Point2f> img_points;
         cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coefficients,
                           img_points);
-        std::cout << "line_obj: " << object_points[0] << " -> " << object_points[1] << std::endl;
-        std::cout << "line: " << img_points[0] << " -> " << img_points[1] << std::endl;
-        cv::line(display_img, img_points[0], img_points[1], cv::Scalar(0,0,0), 6);
+        // When point is outside of image, screw up the drawing
+        cv::Rect img_rect(cv::Point(), display_img.size());
+        if (img_rect.contains(img_points[0]) && img_rect.contains(img_points[1])) {
+          cv::line(display_img, img_points[0], img_points[1], cv::Scalar(0,0,0), 3);
+        }
       }
     }
+
+    cv::putText(display_img, getTagRequest(), cv::Point(0,30), cv::FONT_HERSHEY_SIMPLEX,
+                1.0, cv::Scalar(0,0,0), 2);
+    
     cv::imshow("display", display_img);
     char key = cv::waitKey(30);
     switch (key) {
-      case 'q':
+      case 'q':// Quit
         is_good = false;
         break;
-      case 'i':
+      case 'i':// Ignore point
         point_index++;
-        printTagRequest();
+        std::cout << getTagRequest() << std::endl;
+        break;
+      case 'n':// Next
+        calib_img = provider->getNextImg();
+        break;
+      case 'c':// Cancel
+        if (point_index >0) {
+          point_index--;
+          points_in_img.erase(point_index);
+          updatePose();
+        }
+        break;
     }
     //TODO
     // - If pose is available: draw field
@@ -119,6 +141,7 @@ public:
   }
 
 private:
+  std::unique_ptr<ImageProvider> provider;
   std::unique_ptr<Field> field;
 
   cv::Mat calib_img;
@@ -178,7 +201,7 @@ int main(int argc, char ** argv) {
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
   }
 
-  ReplayImageProvider provider(video_arg.getValue());
+  std::unique_ptr<ImageProvider> provider(new ReplayImageProvider(video_arg.getValue()));
   
   IntrinsicParameters intrinsic;
   std::ifstream in(intrinsic_arg.getValue());
@@ -191,7 +214,7 @@ int main(int argc, char ** argv) {
   std::unique_ptr<Field> field(new Field());
   field->loadFile(field_arg.getValue());
 
-  StaticCalibrationTool calib_tool(provider.getNextImg(), std::move(field), intrinsic);
+  StaticCalibrationTool calib_tool(std::move(provider), std::move(field), intrinsic);
 
   while(calib_tool.isGood()) {
     calib_tool.update();

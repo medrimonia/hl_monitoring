@@ -103,6 +103,12 @@ void Field::updatePointsOfInterest() {
   points_of_interest["goal_area_corner+-"] = cv::Point3f( gac_x, -gac_y, 0);
   points_of_interest["goal_area_corner-+"] = cv::Point3f(-gac_x,  gac_y, 0);
   points_of_interest["goal_area_corner--"] = cv::Point3f(-gac_x, -gac_y, 0);
+  double gat_x = field_length / 2;
+  double gat_y = goal_area_width/2;
+  points_of_interest["goal_area_t++"] = cv::Point3f( gat_x,  gat_y, 0);
+  points_of_interest["goal_area_t+-"] = cv::Point3f( gat_x, -gat_y, 0);
+  points_of_interest["goal_area_t-+"] = cv::Point3f(-gat_x,  gat_y, 0);
+  points_of_interest["goal_area_t--"] = cv::Point3f(-gat_x, -gat_y, 0);
   double pm_x = field_length / 2 - penalty_mark_dist;
   points_of_interest["penalty_mark+"] = cv::Point3f( pm_x, 0, 0);
   points_of_interest["penalty_mark-"] = cv::Point3f(-pm_x, 0, 0);
@@ -121,6 +127,20 @@ void Field::updateWhiteLines() {
         points_of_interest["field_corner-+"]});
   white_lines.push_back({points_of_interest["field_corner-+"],
         points_of_interest["field_corner++"]});
+  white_lines.push_back({points_of_interest["middle_line_t+"],
+        points_of_interest["middle_line_t-"]});
+  white_lines.push_back({points_of_interest["goal_area_t++"],
+        points_of_interest["goal_area_corner++"]});
+  white_lines.push_back({points_of_interest["goal_area_corner++"],
+        points_of_interest["goal_area_corner+-"]});
+  white_lines.push_back({points_of_interest["goal_area_corner+-"],
+        points_of_interest["goal_area_t+-"]});
+  white_lines.push_back({points_of_interest["goal_area_t-+"],
+        points_of_interest["goal_area_corner-+"]});
+  white_lines.push_back({points_of_interest["goal_area_corner-+"],
+        points_of_interest["goal_area_corner--"]});
+  white_lines.push_back({points_of_interest["goal_area_corner--"],
+        points_of_interest["goal_area_t--"]});
 }
 
 
