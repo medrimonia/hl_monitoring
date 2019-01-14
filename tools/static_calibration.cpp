@@ -130,14 +130,16 @@ public:
         }
         break;
     }
-    //TODO
-    // - If pose is available: draw field
-    // - Handle key
-    //   - backspace: remove last point in the list
   }
 
-  void saveMetaInformation(const std::string & path) {
-    // TODO
+  void savePose(const std::string & path) {
+    Pose3D pose;
+    cvToPose3D(rvec,tvec, &pose);
+    std::ofstream out(path, std::ios::binary);
+    if (!out.good()) {
+      throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '" + path + "'");
+    }
+    pose.SerializeToOstream(&out);
   }
 
 private:
@@ -181,8 +183,8 @@ int main(int argc, char ** argv) {
   TCLAP::ValueArg<std::string> video_arg("v", "video", "The path to the video", true,
                                          "video.avi", "string");
   TCLAP::ValueArg<std::string> output_arg("o","output",
-                                          "The output path for meta-information of the video",
-                                          true, "output.bin", "string");
+                                          "The output path for the pose of the camera",
+                                          true, "pose.bin", "string");
   TCLAP::ValueArg<std::string> intrinsic_arg("i","intrinsic",
                                              "Path to the file containing the intrinsic parameters",
                                              true, "intrinsic.bin", "string");
@@ -219,5 +221,5 @@ int main(int argc, char ** argv) {
   while(calib_tool.isGood()) {
     calib_tool.update();
   }
-  calib_tool.saveMetaInformation(output_arg.getValue());
+  calib_tool.savePose(output_arg.getValue());
 }
