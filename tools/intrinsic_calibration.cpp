@@ -8,11 +8,12 @@
 #include <hl_monitoring/replay_image_provider.h>
 #include <hl_monitoring/utils.h>
 
-
 #include <opencv2/opencv.hpp>
 #include <tclap/CmdLine.h>
 
+#include <algorithm>
 #include <iostream>
+#include <random>
 
 using namespace hl_monitoring;
 
@@ -29,12 +30,16 @@ int main(int argc, char ** argv) {
   TCLAP::ValueArg<float> frequency_arg("f", "frequency",
                                        "Maximal frequency at which images are shown",
                                        false, 1.0, "float");
+  TCLAP::ValueArg<float> nb_images_arg("n", "nb_images",
+                                       "Maximal number of images used for training",
+                                       false, 20, "int");
   TCLAP::SwitchArg show_switch("s", "show",
-                                 "Show images used for calibration and after calibration",
-                                 cmd, false);
+                               "Show images used for calibration and after calibration",
+                               cmd, false);
 
   cmd.add(video_arg);
   cmd.add(output_arg);
+  cmd.add(nb_images_arg);
   cmd.add(frequency_arg);
 
   double sleep_time = 1000 / frequency_arg.getValue();
@@ -67,7 +72,6 @@ int main(int argc, char ** argv) {
     bool success = cv::findChessboardCorners(gray, patternSize, corners);
 
     if (!success) {
-      std::cerr << "failed to find corners" << std::endl;
       if (show_switch.getValue()) {
         cv::imshow("test", img);
         cv::waitKey(sleep_time);
@@ -95,8 +99,30 @@ int main(int argc, char ** argv) {
 
   std::cout << "Success: " << successCount << "/" << imageCount << std::endl;
 
-  // Calibration
+  int nb_images = nb_images_arg.getValue();
 
+  if (objPoints.size() > nb_images) {
+    // Associating data
+    typedef std::pair<std::vector<cv::Point3f>, std::vector<cv::Point2f>> LearningEntry;
+    std::vector<LearningEntry> learning_data;
+    for (size_t idx = 0; idx < objPoints.size(); idx++) {
+      LearningEntry entry(objPoints[idx], imgPoints[idx]);
+      learning_data.push_back(entry);
+    }
+    // Shuffling data
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::shuffle(learning_data.begin(), learning_data.end(), generator);
+    // Picking up n first elements
+    objPoints.clear();
+    imgPoints.clear();
+    for (int idx = 0; idx < nb_images; idx++) {
+      objPoints.push_back(learning_data[idx].first);
+      imgPoints.push_back(learning_data[idx].second);
+    }
+  }
+  
+  // Calibration
   cv::Mat camera_matrix;
   cv::Mat distortion_coeffs;
   std::vector<cv::Mat> rvecs, tvecs;

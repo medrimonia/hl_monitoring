@@ -32,10 +32,6 @@ add_custom_target(${PROJECT_NAME}_generate_headers ALL
 
 set(${PROJECT_NAME}_EXPORTED_TARGETS ${PROJECT_NAME}_generate_headers)
 
-message(WARNING "Jsoncpp found: ${JSONCPP_FOUND}")
-message(WARNING "Jsoncpp include dirs: ${JSONCPP_INCLUDE_DIRS}")
-message(WARNING "Jsoncpp libraries: ${JSONCPP_LIBRARIES}")
-
 set(DELEGATE_INCLUDE_DIRS
   include
   ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
@@ -83,4 +79,7 @@ if (BUILD_HL_MONITORING_TOOLS)
 
   add_executable(static_calibration tools/static_calibration.cpp)
   target_link_libraries(static_calibration ${PROJECT_NAME} ${LINKED_LIBRARIES})
+
+  add_executable(video_recorder tools/video_recorder.cpp)
+  target_link_libraries(video_recorder ${PROJECT_NAME} ${LINKED_LIBRARIES})
 endif()
