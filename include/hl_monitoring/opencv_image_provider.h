@@ -16,10 +16,12 @@ namespace hl_monitoring
 class OpenCVImageProvider : public ImageProvider {
 public:
   /**
-   * If output path is not null, write a video to output_path
+   * If output_prefix is not empty, write video during execution and saves
+   * MetaInformation when object is closed
    */
   OpenCVImageProvider(const std::string & video_path,
-                      const std::string & output_path = "");
+                      const std::string & output_prefix = "");
+  virtual ~OpenCVImageProvider();
 
   void openInputStream(const std::string & video_path);
   void openOutputStream(const std::string & output_path);
@@ -36,6 +38,10 @@ public:
   cv::Mat getNextImg() override;
 
   bool isStreamFinished() override;
+
+  void saveVideoMetaInformation();
+
+  double getStart() const override;
 
 private:
   /**
@@ -77,6 +83,12 @@ private:
    * The number of frames in the video
    */
   int nb_frames;
+
+  /**
+   * The prefix used for writing video file and meta_information file. If empty,
+   * then no files are written
+   */
+  std::string output_prefix;
 };
 
 }

@@ -14,6 +14,16 @@ namespace hl_monitoring
 MonitoringManager::MonitoringManager() {
 }
 
+MonitoringManager::~MonitoringManager() {
+  if (msg_collection_path != "") {
+    message_manager->saveMessages(msg_collection_path);
+  }
+  for (auto & entry : image_providers) {
+    delete(entry.second.release());
+  }
+}
+
+
 void MonitoringManager::loadConfig(const std::string & path) {
   // Reading Json file
   std::ifstream in(path);
@@ -27,6 +37,8 @@ void MonitoringManager::loadConfig(const std::string & path) {
   checkMember(root, "message_manager");
   loadImageProviders(root["image_providers"]);
   loadMessageManager(root["message_manager"]);
+  readVal(root, "live", &live);
+  tryReadVal(root, "msg_collection_path", &msg_collection_path);
 }
 
 std::unique_ptr<ImageProvider> MonitoringManager::buildImageProvider(const Json::Value & v) {
@@ -37,9 +49,9 @@ std::unique_ptr<ImageProvider> MonitoringManager::buildImageProvider(const Json:
   readVal(v,"class_name", &class_name);
   readVal(v,"input_path", &input_path);
   if (class_name == "OpenCVImageProvider") {
-    std::string output_path;
-    if (v.isMember("output_path")) {
-      result.reset(new OpenCVImageProvider(input_path, v["output_path"].asString()));
+    std::string output_prefix;
+    if (v.isMember("output_prefix")) {
+      result.reset(new OpenCVImageProvider(input_path, v["output_prefix"].asString()));
     } else { 
       result.reset(new OpenCVImageProvider(input_path));
     }
@@ -114,6 +126,20 @@ MonitoringManager::getCalibratedImages(double time_stamp) {
   return images;
 }
 
+hl_communication::MessageManager::Status MonitoringManager::getStatus(double time_stamp) {
+  return message_manager->getStatus(time_stamp);
+  
+}
+
+double MonitoringManager::getStart() const {
+  double min_ts = std::numeric_limits<double>::max();
+  min_ts = std::min(min_ts, message_manager->getStart());
+  for (const auto & entry : image_providers) {
+    min_ts = std::min(min_ts, entry.second->getStart());
+  }
+  return min_ts;
+}
+
 bool MonitoringManager::isGood() const {
   for (const auto & entry : image_providers) {
     if (entry.second->isStreamFinished())
@@ -121,5 +147,10 @@ bool MonitoringManager::isGood() const {
   }
   return true;
 }
+
+bool MonitoringManager::isLive() const {
+  return live;
+}
+
 
 }

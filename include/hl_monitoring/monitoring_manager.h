@@ -20,6 +20,7 @@ namespace hl_monitoring
 class MonitoringManager {
 public:
   MonitoringManager();
+  ~MonitoringManager();
 
   void loadConfig(const std::string & path);
 
@@ -35,8 +36,17 @@ public:
   void update();
 
   std::map<std::string, CalibratedImage> getCalibratedImages(double time_stamp);
+
+  hl_communication::MessageManager::Status getStatus(double time_stamp);
+
+  /**
+   * Return the first time_stamp found in messages and video streams
+   */
+  double getStart() const;
   
   bool isGood() const;
+
+  bool isLive() const;
 
 private:
   /**
@@ -48,6 +58,17 @@ private:
    * Access to all the channels allowing to retrieve images
    */
   std::map<std::string,std::unique_ptr<ImageProvider>> image_providers;
+
+  /**
+   * Path to the output file where all the received messages will be stored upon deletion
+   * - If empty, messages are not saved
+   */
+  std::string msg_collection_path;
+
+  /**
+   * Is the monitoring session live or not?
+   */
+  bool live;
 
 };
 

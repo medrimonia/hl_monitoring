@@ -57,6 +57,9 @@ template <typename T>
 void readVal(const Json::Value & v, const std::string & key, T * dst) = delete;
 
 template <>
+void readVal<bool>(const Json::Value & v, const std::string & key, bool * dst);
+
+template <>
 void readVal<int>(const Json::Value & v, const std::string & key, int * dst);
 
 template <>

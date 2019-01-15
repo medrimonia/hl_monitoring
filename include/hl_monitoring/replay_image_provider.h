@@ -32,6 +32,8 @@ public:
   void setIndex(int index);
   int getIndex(double time_stamp) const;
 
+  double getStart() const override;
+
 private:
   /**
    * The video read from the file

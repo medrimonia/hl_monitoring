@@ -11,12 +11,16 @@ namespace hl_monitoring
 {
 
 OpenCVImageProvider::OpenCVImageProvider(const std::string & video_path,
-                                         const std::string & output_path)
+                                         const std::string & output_prefix_)
+  : output_prefix(output_prefix_)
 {
   openInputStream(video_path);
-  if (output_path != "") {
-    openOutputStream(output_path);
+  if (output_prefix != "") {
+    openOutputStream(output_prefix + ".avi");
   }
+}
+OpenCVImageProvider::~OpenCVImageProvider() {
+  saveVideoMetaInformation();
 }
 
 void OpenCVImageProvider::openInputStream(const std::string & video_path) {
@@ -112,5 +116,26 @@ bool OpenCVImageProvider::isStreamFinished() {
   return false;
 }
 
+void OpenCVImageProvider::saveVideoMetaInformation() {
+  // Do not save if no output_prefix has been provided
+  if (output_prefix == "")
+    return;
+  
+  std::string path = output_prefix + ".bin"; 
+  std::ofstream out(path, std::ios::binary);
+  if (!out.good()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Failed to open file '" + path + "'");
+  }
+  if (!meta_information.SerializeToOstream(&out)) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Failed to write to file '" + path + "'");
+  }
+}
+
+double OpenCVImageProvider::getStart() const {
+  if (indices_by_time_stamp.size() == 0) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + " indices_by_time_stamp is empty");
+  }
+  return indices_by_time_stamp.begin()->first;
+}
 
 }

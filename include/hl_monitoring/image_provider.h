@@ -8,6 +8,8 @@ namespace hl_monitoring
 class ImageProvider {
 public:
 
+  virtual ~ImageProvider(){}
+
   /**
    * Return to the first frame of the stream, throw error on live stream
    */
@@ -33,6 +35,11 @@ public:
    * For live streams, means that the camera has been disconnected 
    */
   virtual bool isStreamFinished() = 0;
+
+  /**
+   * Return the first time_stamp of the images received
+   */
+  virtual double getStart() const = 0;
 };
 
 }

@@ -89,6 +89,16 @@ void checkMember(const Json::Value & v, const std::string & key)
 }
 
 template <>
+void readVal<bool>(const Json::Value & v, const std::string & key, bool * dst)
+{
+  checkMember(v,key);
+  if (!v[key].isBool()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting a bool for key '" + key + "'");
+  }
+  *dst = v[key].asBool();
+}
+
+template <>
 void readVal<int>(const Json::Value & v, const std::string & key, int * dst)
 {
   checkMember(v,key);
