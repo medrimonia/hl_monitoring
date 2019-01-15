@@ -12,25 +12,27 @@ namespace hl_monitoring
  */
 class CalibratedImage {
 public:
-
+  CalibratedImage();
   CalibratedImage(const cv::Mat & img,
                   const Pose3D & pose,
                   const IntrinsicParameters & camera_parameters);
+  CalibratedImage(const cv::Mat & img,
+                  const CameraMetaInformation & camera_meta);
+
+  const cv::Mat & getImg() const;
+
+  bool hasCameraParameters() const;
+  bool hasPose() const;
+
+  void exportCameraParameters(cv::Mat * camera_matrix,
+                              cv::Mat * distortion_coefficients,
+                              cv::Size * size) const;
+  void exportPose(cv::Mat * rvec, cv::Mat * tvec) const;
 
 private:
   cv::Mat img;
-  cv::Mat camera_matrix;
-  cv::Mat camera_distortion_coeffs;
 
-  /**
-   * Rotation vector (see cv::Rodrigues)
-   */
-  cv::Mat rvec;
-
-  /**
-   * Translation vector toward cameras optical center in the field referential
-   */
-  cv::Mat tvec;
+  CameraMetaInformation camera_meta;
 };
 
 }

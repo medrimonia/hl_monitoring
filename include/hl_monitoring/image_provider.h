@@ -19,6 +19,11 @@ public:
   virtual CalibratedImage getCalibratedImage(double time_stamp) = 0;
 
   /**
+   * For livestream, receive images from the stream
+   */
+  virtual void update() = 0;
+
+  /**
    * Get the next available image
    */
   virtual cv::Mat getNextImg() = 0;

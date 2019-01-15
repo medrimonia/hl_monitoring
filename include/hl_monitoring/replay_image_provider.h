@@ -25,6 +25,8 @@ public:
   
   cv::Mat getNextImg() override;
 
+  void update() override;
+
   bool isStreamFinished() override;
 
   void setIndex(int index);

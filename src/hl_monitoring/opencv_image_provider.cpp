@@ -65,32 +65,32 @@ CalibratedImage OpenCVImageProvider::getCalibratedImage(double time_stamp) {
   }
 
   int index = indices_by_time_stamp.size() - 1;
-  
-  IntrinsicParameters intrinsic_parameters;
-  Pose3D camera_pose;
+
+  CameraMetaInformation camera_meta;
   if (meta_information.has_camera_parameters()) {
-    intrinsic_parameters = meta_information.camera_parameters();
-  } else {
-    throw std::runtime_error("Intrinsic parameters are not available");
+    camera_meta.mutable_camera_parameters()->CopyFrom(meta_information.camera_parameters());
   }
   
   const FrameEntry & frame = meta_information.frames(index);
   if (frame.has_pose()) {
-    camera_pose = frame.pose();
+    camera_meta.mutable_pose()->CopyFrom(frame.pose());
   } else if (meta_information.has_default_pose()) {
-    camera_pose = meta_information.default_pose();
-  } else {
-    throw std::runtime_error("Frame has no pose information and no default pose available");
+    camera_meta.mutable_pose()->CopyFrom(meta_information.default_pose());
   }
 
-  return CalibratedImage(img, camera_pose, intrinsic_parameters);
+  return CalibratedImage(img, camera_meta);
+}
+
+void OpenCVImageProvider::update() {
+  //TODO: note: ideally, images should be polled in another thread and only
+  //synchronization should happen here
+  getNextImg();
 }
 
 cv::Mat OpenCVImageProvider::getNextImg() {
   input.read(img);
 
-  double time_stamp =
-    duration_cast<duration<double>>(steady_clock::now().time_since_epoch()).count();
+  double time_stamp = getTimeStamp();
   if (img.empty()) {
     throw std::runtime_error(HL_MONITOR_DEBUG + "Blank frame at frame: "
                              + std::to_string(index) + "/" + std::to_string(nb_frames));

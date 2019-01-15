@@ -39,5 +39,45 @@ void cvToPose3D(const cv::Mat & rvec,
                 const cv::Mat & tvec,
                 Pose3D * pose);
 
+/**
+ * Return time_since_epoch in a double value (unit: seconds)
+ */
+double getTimeStamp();
+
+void checkMember(const Json::Value & v, const std::string & key);
+
+/**
+ * Place v[key] in 'dst'
+ * Throws an error with an explicit message in case:
+ * - v is not an object
+ * - v[key] does not contain an object
+ * - v[key] has not the required type
+ */
+template <typename T>
+void readVal(const Json::Value & v, const std::string & key, T * dst) = delete;
+
+template <>
+void readVal<int>(const Json::Value & v, const std::string & key, int * dst);
+
+template <>
+void readVal<double>(const Json::Value & v, const std::string & key, double * dst);
+
+template <>
+void readVal<std::string>(const Json::Value & v, const std::string & key, std::string * dst);
+
+/**
+ * Place v[key] in 'dst', if v is not an object or if v does not contain key, do
+ * not change dst and returns
+ *
+ * Throws an error with an explicit message in case:
+ * - v[key] has not the required type
+ */
+template <typename T>
+void tryReadVal(const Json::Value & v, const std::string & key, T * dst) {
+  if (!v.isObject() || !v.isMember(key)) { return; }
+  readVal(v, key, dst);
+}
+
+
 
 }

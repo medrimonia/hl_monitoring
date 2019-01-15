@@ -7,15 +7,47 @@
 namespace hl_monitoring
 {
 
-CalibratedImage::CalibratedImage(const cv::Mat & img,
+CalibratedImage::CalibratedImage() {
+}
+
+CalibratedImage::CalibratedImage(const cv::Mat & img_,
                                  const Pose3D & pose,
-                                 const IntrinsicParameters & camera_parameters) {
-  cv::Size size;
-  intrinsicToCV(camera_parameters, &camera_matrix, &camera_distortion_coeffs, &size);
-  if (size.width != img.cols || size.height != img.rows) {
-    throw std::logic_error("Img size doest not match size declared in camera_parameters");
+                                 const IntrinsicParameters & camera_parameters)
+  : img(img_)
+{
+  camera_meta.mutable_pose()->CopyFrom(pose);
+  camera_meta.mutable_camera_parameters()->CopyFrom(camera_parameters);
+}
+
+CalibratedImage::CalibratedImage(const cv::Mat & img_,
+                                 const CameraMetaInformation & camera_meta_)
+  : img(img_), camera_meta(camera_meta_)
+{
+}
+
+const cv::Mat & CalibratedImage::getImg() const {
+  return img;
+}
+
+bool CalibratedImage::hasCameraParameters() const {
+  return camera_meta.has_camera_parameters();
+}
+
+bool CalibratedImage::hasPose() const {
+  return camera_meta.has_pose();
+}
+
+void CalibratedImage::exportCameraParameters(cv::Mat * camera_matrix,
+                                             cv::Mat * distortion_coefficients,
+                                             cv::Size * size) const {
+  if (hasCameraParameters()) {
+    intrinsicToCV(camera_meta.camera_parameters(), camera_matrix, distortion_coefficients, size);
   }
-  pose3DToCV(pose, &rvec, &tvec);
+}
+void CalibratedImage::exportPose(cv::Mat * rvec, cv::Mat * tvec) const {
+  if (hasPose()) {
+    pose3DToCV(camera_meta.pose(), rvec, tvec);
+  }
 }
 
 }

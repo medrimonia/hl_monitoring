@@ -89,6 +89,10 @@ cv::Mat ReplayImageProvider::getNextImg() {
   return img;
 }
 
+void ReplayImageProvider::update() {
+  // Nothing required
+}
+
 bool ReplayImageProvider::isStreamFinished() {
   return index >= nb_frames;
 }

@@ -6,19 +6,6 @@
 
 namespace hl_monitoring {
 
-static double read(const Json::Value & v, const std::string & key) {  
-  if (!v.isObject()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " v is not an object");
-  }
-  if (!v.isMember(key)) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " v has no key '" + key + "'");
-  }
-  if (!v[key].isDouble()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " v[" + key + "] is not a double");
-  }
-  return v[key].asDouble();
-}
-
 Field::Field() {
   ball_radius = 0.075;
   /// Expected field sizes
@@ -53,18 +40,18 @@ Json::Value Field::toJson() const {
 }
 
 void Field::fromJson(const Json::Value & v) {
-  ball_radius         = read(v,"ball_radius"        );
-  line_width          = read(v,"line_width"         );
-  center_radius       = read(v,"center_radius"      );
-  border_strip_width  = read(v,"border_strip_width" );
-  penalty_mark_dist   = read(v,"penalty_mark_dist"  );
-  penalty_mark_length = read(v,"penalty_mark_length");
-  goal_width          = read(v,"goal_width"         );
-  goal_depth          = read(v,"goal_depth"         );
-  goal_area_length    = read(v,"goal_area_length"   );
-  goal_area_width     = read(v,"goal_area_width"    );
-  field_length        = read(v,"field_length"       );
-  field_width         = read(v,"field_width"        );
+  readVal(v, "ball_radius"        , &ball_radius         );
+  readVal(v, "line_width"         , &line_width          );
+  readVal(v, "center_radius"      , &center_radius       );
+  readVal(v, "border_strip_width" , &border_strip_width  );
+  readVal(v, "penalty_mark_dist"  , &penalty_mark_dist   );
+  readVal(v, "penalty_mark_length", &penalty_mark_length );
+  readVal(v, "goal_width"         , &goal_width          );
+  readVal(v, "goal_depth"         , &goal_depth          );
+  readVal(v, "goal_area_length"   , &goal_area_length    );
+  readVal(v, "goal_area_width"    , &goal_area_width     );
+  readVal(v, "field_length"       , &field_length        );
+  readVal(v, "field_width"        , &field_width         );
   updatePointsOfInterest();
   updateWhiteLines();
 }

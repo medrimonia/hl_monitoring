@@ -47,7 +47,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME} ${DELEGATE_LIBRARIES}
   )
 
-include_directories(${DELEGATE_INCLUDE_DIRS} ${catkin_INCLUDR_DIRS} )
+include_directories(${DELEGATE_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} )
 
 set(SOURCES_DIRECTORIES
   src/hl_monitoring
@@ -82,4 +82,7 @@ if (BUILD_HL_MONITORING_TOOLS)
 
   add_executable(video_recorder tools/video_recorder.cpp)
   target_link_libraries(video_recorder ${PROJECT_NAME} ${LINKED_LIBRARIES})
+
+  add_executable(basic_monitoring tools/basic_monitoring.cpp)
+  target_link_libraries(basic_monitoring ${PROJECT_NAME} ${LINKED_LIBRARIES})
 endif()

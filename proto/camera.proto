@@ -46,6 +46,17 @@ message Pose3D {
   repeated float translation = 2;
 }
 
+message CameraMetaInformation {
+  /**
+   * Intrinsic parameters of the camera
+   */
+  optional IntrinsicParameters camera_parameters = 1;
+  /**
+   * Default pose of the camera if no pose is provided for a frame
+   */
+  optional Pose3D pose = 2;
+}
+
 message FrameEntry {
   /**
    * Time at which the pose was measured or estimated

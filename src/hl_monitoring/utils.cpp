@@ -1,5 +1,9 @@
 #include "hl_monitoring/utils.h"
 
+#include <chrono>
+
+using namespace std::chrono;
+
 namespace hl_monitoring
 {
 
@@ -72,5 +76,47 @@ void cvToPose3D(const cv::Mat & rvec,
     pose->add_translation(tvec.at<double>(i,0));
   }
 }
+
+double getTimeStamp() {
+  return duration_cast<duration<double>>(steady_clock::now().time_since_epoch()).count();
+}
+
+void checkMember(const Json::Value & v, const std::string & key)
+{
+  if (!v.isObject() || !v.isMember(key)){
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Could not find member '" + key + "'");
+  }
+}
+
+template <>
+void readVal<int>(const Json::Value & v, const std::string & key, int * dst)
+{
+  checkMember(v,key);
+  if (!v[key].isInt()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting an int for key '" + key + "'");
+  }
+  *dst = v[key].asInt();
+}
+
+template <>
+void readVal<double>(const Json::Value & v, const std::string & key, double * dst)
+{
+  checkMember(v,key);
+  if (!v[key].isDouble()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting a double for key '" + key + "'");
+  }
+  *dst = v[key].asDouble();
+}
+
+template <>
+void readVal<std::string>(const Json::Value & v, const std::string & key, std::string * dst)
+{
+  checkMember(v,key);
+  if (!v[key].isString()) {
+    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting a string for key '" + key + "'");
+  }
+  *dst = v[key].asString();
+}
+
 
 }

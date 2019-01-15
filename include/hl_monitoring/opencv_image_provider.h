@@ -30,6 +30,8 @@ public:
   void restartStream() override;
 
   CalibratedImage getCalibratedImage(double time_stamp) override;
+
+  void update() override;
   
   cv::Mat getNextImg() override;
 
