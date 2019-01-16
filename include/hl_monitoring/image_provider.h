@@ -18,7 +18,7 @@ public:
   /**
    * Return an image along with associated intrinsic and extrinsic parameters
    */
-  virtual CalibratedImage getCalibratedImage(double time_stamp) = 0;
+  virtual CalibratedImage getCalibratedImage(uint64_t time_stamp) = 0;
 
   /**
    * For livestream, receive images from the stream
@@ -39,7 +39,7 @@ public:
   /**
    * Return the first time_stamp of the images received
    */
-  virtual double getStart() const = 0;
+  virtual uint64_t getStart() const = 0;
 };
 
 }

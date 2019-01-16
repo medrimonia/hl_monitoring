@@ -35,14 +35,14 @@ public:
 
   void update();
 
-  std::map<std::string, CalibratedImage> getCalibratedImages(double time_stamp);
+  std::map<std::string, CalibratedImage> getCalibratedImages(uint64_t time_stamp);
 
-  hl_communication::MessageManager::Status getStatus(double time_stamp);
+  hl_communication::MessageManager::Status getStatus(uint64_t time_stamp);
 
   /**
    * Return the first time_stamp found in messages and video streams
    */
-  double getStart() const;
+  uint64_t getStart() const;
   
   bool isGood() const;
 

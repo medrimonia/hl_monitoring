@@ -119,7 +119,7 @@ void MonitoringManager::update() {
 }
 
 std::map<std::string, CalibratedImage>
-MonitoringManager::getCalibratedImages(double time_stamp) {
+MonitoringManager::getCalibratedImages(uint64_t time_stamp) {
   std::map<std::string, CalibratedImage> images;
   for (const auto & entry : image_providers) {
     images[entry.first] = entry.second->getCalibratedImage(time_stamp);
@@ -127,13 +127,13 @@ MonitoringManager::getCalibratedImages(double time_stamp) {
   return images;
 }
 
-hl_communication::MessageManager::Status MonitoringManager::getStatus(double time_stamp) {
+hl_communication::MessageManager::Status MonitoringManager::getStatus(uint64_t time_stamp) {
   return message_manager->getStatus(time_stamp);
   
 }
 
-double MonitoringManager::getStart() const {
-  double min_ts = std::numeric_limits<double>::max();
+uint64_t MonitoringManager::getStart() const {
+  uint64_t min_ts = std::numeric_limits<uint64_t>::max();
   min_ts = std::min(min_ts, message_manager->getStart());
   for (const auto & entry : image_providers) {
     min_ts = std::min(min_ts, entry.second->getStart());

@@ -44,7 +44,7 @@ void ReplayImageProvider::loadMetaInformation(const std::string & meta_informati
   nb_frames = meta_information.frames_size();
   std::cout << "After loading meta informations: " << nb_frames << " frames" << std::endl;
   for (int idx = 0; idx < nb_frames; idx++) {
-    double time_stamp =  meta_information.frames(idx).time_stamp();
+    uint64_t time_stamp =  meta_information.frames(idx).time_stamp();
     if (indices_by_time_stamp.count(time_stamp) > 0) {
       throw std::runtime_error(HL_DEBUG + "Duplicated time_stamp "
                                + std::to_string(time_stamp));
@@ -57,7 +57,7 @@ void ReplayImageProvider::restartStream() {
   setIndex(0);
 }
 
-CalibratedImage ReplayImageProvider::getCalibratedImage(double time_stamp) {
+CalibratedImage ReplayImageProvider::getCalibratedImage(uint64_t time_stamp) {
   setIndex(getIndex(time_stamp));
 
   cv::Mat img;
@@ -111,7 +111,7 @@ void ReplayImageProvider::setIndex(int new_index) {
                              + std::to_string(index) + " in video");
   }
 }
-int ReplayImageProvider::getIndex(double time_stamp) const {
+int ReplayImageProvider::getIndex(uint64_t time_stamp) const {
   if (indices_by_time_stamp.size() == 0) {
     throw std::runtime_error(HL_DEBUG + "indices_by_time_stamp is empty");
   }
@@ -122,7 +122,7 @@ int ReplayImageProvider::getIndex(double time_stamp) const {
   return it->second;
 }
 
-double ReplayImageProvider::getStart() const {
+uint64_t ReplayImageProvider::getStart() const {
   if (indices_by_time_stamp.size() == 0) {
     throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
   }

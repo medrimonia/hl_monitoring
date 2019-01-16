@@ -61,7 +61,7 @@ message FrameEntry {
   /**
    * Time at which the pose was measured or estimated
    */
-  required double time_stamp = 1;
+  required uint64 time_stamp = 1;
   /**
    * The transformation from field referential to camera referential
    */

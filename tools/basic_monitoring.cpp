@@ -36,8 +36,8 @@ int main(int argc, char ** argv) {
   bool exit = false;
 
   // While exit was not explicitly required, run
-  double now;
-  double dt = 0.03;//[s]
+  uint64_t now;
+  uint64_t dt = 30 * 1000;//[microseconds]
   if (!manager.isLive()) {
     now = manager.getStart();
   }

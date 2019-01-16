@@ -21,7 +21,7 @@ public:
 
   void restartStream() override;
 
-  CalibratedImage getCalibratedImage(double time_stamp) override;
+  CalibratedImage getCalibratedImage(uint64_t time_stamp) override;
   
   cv::Mat getNextImg() override;
 
@@ -30,9 +30,9 @@ public:
   bool isStreamFinished() override;
 
   void setIndex(int index);
-  int getIndex(double time_stamp) const;
+  int getIndex(uint64_t time_stamp) const;
 
-  double getStart() const override;
+  uint64_t getStart() const override;
 
 private:
   /**
@@ -48,7 +48,7 @@ private:
   /**
    * Provide access to index using time_stamps
    */
-  std::map<double, int> indices_by_time_stamp;
+  std::map<uint64_t, int> indices_by_time_stamp;
 
   /**
    * Index of the next image read in the video

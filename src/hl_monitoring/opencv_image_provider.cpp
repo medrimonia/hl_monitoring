@@ -61,7 +61,7 @@ void OpenCVImageProvider::restartStream() {
   throw std::logic_error("It makes no sense to restart the stream in a 'OpenCVImageProvider'");
 }
 
-CalibratedImage OpenCVImageProvider::getCalibratedImage(double time_stamp) {
+CalibratedImage OpenCVImageProvider::getCalibratedImage(uint64_t time_stamp) {
   if (nb_frames == 0) {
     throw std::runtime_error(HL_DEBUG + " no frames found in the stream");
   }
@@ -95,7 +95,7 @@ void OpenCVImageProvider::update() {
 cv::Mat OpenCVImageProvider::getNextImg() {
   input.read(img);
 
-  double time_stamp = getTimeStamp();
+  uint64_t time_stamp = getTimeStamp();
   if (img.empty()) {
     throw std::runtime_error(HL_DEBUG + "Blank frame at frame: "
                              + std::to_string(index) + "/" + std::to_string(nb_frames));
@@ -132,7 +132,7 @@ void OpenCVImageProvider::saveVideoMetaInformation() {
   }
 }
 
-double OpenCVImageProvider::getStart() const {
+uint64_t OpenCVImageProvider::getStart() const {
   if (indices_by_time_stamp.size() == 0) {
     throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
   }
