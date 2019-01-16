@@ -26,25 +26,23 @@ public:
   StaticCalibrationTool(std::unique_ptr<ImageProvider> provider_,
                         std::unique_ptr<Field> field_,
                         const IntrinsicParameters & camera_parameters)
-    : provider(std::move(provider_)),field(std::move(field_)), is_good(true), point_index(0)
-    {
-      calib_img = provider->getNextImg();
-      intrinsicToCV(camera_parameters, &camera_matrix, &distortion_coefficients, &img_size);
+    : provider(std::move(provider_)),field(std::move(field_)), point_index(0), is_good(true) {
+    calib_img = provider->getNextImg();
+    intrinsicToCV(camera_parameters, &camera_matrix, &distortion_coefficients, &img_size);
 
-      for (const auto & entry : field->getPointsOfInterest()) {
-        points_names.push_back(entry.first);
-        points_in_world.push_back(entry.second);
-      }
-
-      cv::namedWindow("display");
-      
-      cv::setMouseCallback("display",
-                           [](int event, int x, int y, int, void *param) -> void {
-                             StaticCalibrationTool * tool = (StaticCalibrationTool *)param;
-                             tool->onClick(event, x, y, param);
-                           }, this);
-      std::cout << getTagRequest() << std::endl;
+    for (const auto & entry : field->getPointsOfInterest()) {
+      points_names.push_back(entry.first);
+      points_in_world.push_back(entry.second);
     }
+
+    cv::namedWindow("display");
+    cv::setMouseCallback("display",
+                         [](int event, int x, int y, int, void *param) -> void {
+                           StaticCalibrationTool * tool = (StaticCalibrationTool *)param;
+                           tool->onClick(event, x, y, param);
+                         }, this);
+    std::cout << getTagRequest() << std::endl;
+  }
 
   bool isGood() {
     return is_good;

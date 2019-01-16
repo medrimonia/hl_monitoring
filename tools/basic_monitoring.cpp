@@ -33,10 +33,8 @@ int main(int argc, char ** argv) {
 
   manager.loadConfig(config_arg.getValue());
 
-  bool exit = false;
-
   // While exit was not explicitly required, run
-  uint64_t now;
+  uint64_t now = 0;
   uint64_t dt = 30 * 1000;//[microseconds]
   if (!manager.isLive()) {
     now = manager.getStart();

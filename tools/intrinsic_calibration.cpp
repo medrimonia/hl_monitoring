@@ -103,7 +103,7 @@ int main(int argc, char ** argv) {
 
   int nb_images = nb_images_arg.getValue();
 
-  if (objPoints.size() > nb_images) {
+  if ((int)objPoints.size() > nb_images) {
     // Associating data
     typedef std::pair<std::vector<cv::Point3f>, std::vector<cv::Point2f>> LearningEntry;
     std::vector<LearningEntry> learning_data;

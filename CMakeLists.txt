@@ -12,6 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
   hl_communication
   )
 
+#Enable C++11
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11")
+
+# Protobuf generate files with unused parameters
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+
+
 # Handling generated headers is based on Dirk Thomas answer on topic:
 # - https://answers.ros.org/answers/123416/revisions/
 catkin_destinations()
