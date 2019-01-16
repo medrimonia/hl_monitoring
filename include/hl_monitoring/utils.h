@@ -7,22 +7,12 @@
 
 /**
  * Contains multiple conversion tools from hl_communication protobuf format to
- * OpenCV classical format and other utilities functions
+ * OpenCV classical format and other utilities functions related to jsoncpp
  */
 
 namespace hl_monitoring
 {
 
-#define HL_MONITOR_DEBUG                        \
-  (std::string(__FUNCTION__) + ":"              \
-   + hl_monitoring::getBaseName(__FILE__) + ":" \
-   + std::to_string(__LINE__)  + ": ")
-
-/**
- * Return the name of the file at the given path:
- * e.g getBaseName("toto/file.cpp") returns "file.cpp"
- */
-std::string getBaseName(const std::string & path);
 
 void intrinsicToCV(const IntrinsicParameters & camera_parameters,
                    cv::Mat * camera_matrix,
@@ -38,11 +28,6 @@ void pose3DToCV(const Pose3D & pose,
 void cvToPose3D(const cv::Mat & rvec,
                 const cv::Mat & tvec,
                 Pose3D * pose);
-
-/**
- * Return time_since_epoch in a double value (unit: seconds)
- */
-double getTimeStamp();
 
 void checkMember(const Json::Value & v, const std::string & key);
 

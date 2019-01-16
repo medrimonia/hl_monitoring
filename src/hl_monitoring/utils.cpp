@@ -1,19 +1,9 @@
-#include "hl_monitoring/utils.h"
+#include <hl_monitoring/utils.h>
 
-#include <chrono>
-
-using namespace std::chrono;
+#include <hl_communication/utils.h>
 
 namespace hl_monitoring
 {
-
-std::string getBaseName(const std::string & path) {
-  size_t idx = path.find_last_of('/');
-  if (idx == std::string::npos) {
-    return path;
-  }
-  return path.substr(idx+1);
-}
 
 void intrinsicToCV(const IntrinsicParameters & camera_parameters,
                    cv::Mat * camera_matrix,
@@ -77,14 +67,10 @@ void cvToPose3D(const cv::Mat & rvec,
   }
 }
 
-double getTimeStamp() {
-  return duration_cast<duration<double>>(steady_clock::now().time_since_epoch()).count();
-}
-
 void checkMember(const Json::Value & v, const std::string & key)
 {
   if (!v.isObject() || !v.isMember(key)){
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Could not find member '" + key + "'");
+    throw std::runtime_error(HL_DEBUG + "Could not find member '" + key + "'");
   }
 }
 
@@ -93,7 +79,7 @@ void readVal<bool>(const Json::Value & v, const std::string & key, bool * dst)
 {
   checkMember(v,key);
   if (!v[key].isBool()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting a bool for key '" + key + "'");
+    throw std::runtime_error(HL_DEBUG + "Expecting a bool for key '" + key + "'");
   }
   *dst = v[key].asBool();
 }
@@ -103,7 +89,7 @@ void readVal<int>(const Json::Value & v, const std::string & key, int * dst)
 {
   checkMember(v,key);
   if (!v[key].isInt()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting an int for key '" + key + "'");
+    throw std::runtime_error(HL_DEBUG + "Expecting an int for key '" + key + "'");
   }
   *dst = v[key].asInt();
 }
@@ -113,7 +99,7 @@ void readVal<double>(const Json::Value & v, const std::string & key, double * ds
 {
   checkMember(v,key);
   if (!v[key].isDouble()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting a double for key '" + key + "'");
+    throw std::runtime_error(HL_DEBUG + "Expecting a double for key '" + key + "'");
   }
   *dst = v[key].asDouble();
 }
@@ -123,7 +109,7 @@ void readVal<std::string>(const Json::Value & v, const std::string & key, std::s
 {
   checkMember(v,key);
   if (!v[key].isString()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Expecting a string for key '" + key + "'");
+    throw std::runtime_error(HL_DEBUG + "Expecting a string for key '" + key + "'");
   }
   *dst = v[key].asString();
 }

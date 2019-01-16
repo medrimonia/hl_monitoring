@@ -5,6 +5,7 @@
  *
  */
 
+#include <hl_communication/utils.h>
 #include <hl_monitoring/replay_image_provider.h>
 #include <hl_monitoring/utils.h>
 
@@ -15,6 +16,7 @@
 #include <iostream>
 #include <random>
 
+using namespace hl_communication;
 using namespace hl_monitoring;
 
 // This calibration method is highly inspired from:
@@ -153,11 +155,11 @@ int main(int argc, char ** argv) {
   cvToIntrinsic(camera_matrix, distortion_coeffs, img_size, &result);
   std::ofstream out(output_arg.getValue());
   if (!out.good()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '"
+    throw std::runtime_error(HL_DEBUG + " failed to open file '"
                              + output_arg.getValue() + "'");
   }
   if (!result.SerializeToOstream(&out)) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to write in file '"
+    throw std::runtime_error(HL_DEBUG + " failed to write in file '"
                              + output_arg.getValue() + "'");
   }
 }

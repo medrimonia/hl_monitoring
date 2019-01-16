@@ -4,6 +4,7 @@
  * Depending on configuration of image providers, video streams and
  * meta_information are written
  */
+#include <hl_communication/utils.h>
 #include <hl_monitoring/monitoring_manager.h>
 #include <hl_monitoring/utils.h>
 

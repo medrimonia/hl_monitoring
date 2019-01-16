@@ -1,6 +1,7 @@
 #include "hl_monitoring/field.h"
 
-#include "hl_monitoring/utils.h"
+#include <hl_communication/utils.h>
+#include <hl_monitoring/utils.h>
 
 #include <fstream>
 
@@ -59,7 +60,7 @@ void Field::fromJson(const Json::Value & v) {
 void Field::loadFile(const std::string & path) {
   std::ifstream in(path);
   if (!in.good()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '" + path + "'");
+    throw std::runtime_error(HL_DEBUG + " failed to open file '" + path + "'");
   }
   Json::Value root;
   in >> root;

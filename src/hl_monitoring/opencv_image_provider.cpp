@@ -1,11 +1,12 @@
 #include "hl_monitoring/opencv_image_provider.h"
 
-#include "hl_monitoring/utils.h"
+#include <hl_communication/utils.h>
 
 #include <chrono>
 #include <fstream>
 
 using namespace std::chrono;
+using namespace hl_communication;
 
 namespace hl_monitoring
 {
@@ -25,7 +26,7 @@ OpenCVImageProvider::~OpenCVImageProvider() {
 
 void OpenCVImageProvider::openInputStream(const std::string & video_path) {
   if (!input.open(video_path)) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open device '" + video_path + "'");
+    throw std::runtime_error(HL_DEBUG + " failed to open device '" + video_path + "'");
   }
   int read_width = input.get(cv::CAP_PROP_FRAME_WIDTH);
   int read_height = input.get(cv::CAP_PROP_FRAME_HEIGHT);
@@ -36,7 +37,7 @@ void OpenCVImageProvider::openInputStream(const std::string & video_path) {
     int expected_height = meta_information.camera_parameters().img_height();
     if (expected_width != read_width || expected_height != read_height) {
       std::ostringstream oss;
-      oss << HL_MONITOR_DEBUG << " mismatch of sizes: expecting "
+      oss << HL_DEBUG << " mismatch of sizes: expecting "
           << expected_width << "*" << expected_height
           << ", stream size " << read_width << "*" << read_height;
       throw std::runtime_error(oss.str());
@@ -46,13 +47,13 @@ void OpenCVImageProvider::openInputStream(const std::string & video_path) {
 
 void OpenCVImageProvider::openOutputStream(const std::string & output_path) {
   if (!input.isOpened()) {
-    throw std::logic_error(HL_MONITOR_DEBUG + " input stream is not open yet");
+    throw std::logic_error(HL_DEBUG + " input stream is not open yet");
   }
   double fps = input.get(cv::CAP_PROP_FPS);
   bool use_color = true;
   output.open(output_path, cv::VideoWriter::fourcc('X','V','I','D'), fps, img_size, use_color);
   if (!output.isOpened()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Failed to open video");
+    throw std::runtime_error(HL_DEBUG + "Failed to open video");
   }
 }
 
@@ -62,10 +63,10 @@ void OpenCVImageProvider::restartStream() {
 
 CalibratedImage OpenCVImageProvider::getCalibratedImage(double time_stamp) {
   if (nb_frames == 0) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " no frames found in the stream");
+    throw std::runtime_error(HL_DEBUG + " no frames found in the stream");
   }
   if (time_stamp < indices_by_time_stamp.rbegin()->first) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " asking for frames in the past is not supported");
+    throw std::runtime_error(HL_DEBUG + " asking for frames in the past is not supported");
   }
 
   int index = indices_by_time_stamp.size() - 1;
@@ -96,7 +97,7 @@ cv::Mat OpenCVImageProvider::getNextImg() {
 
   double time_stamp = getTimeStamp();
   if (img.empty()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Blank frame at frame: "
+    throw std::runtime_error(HL_DEBUG + "Blank frame at frame: "
                              + std::to_string(index) + "/" + std::to_string(nb_frames));
   }
   // register image
@@ -124,16 +125,16 @@ void OpenCVImageProvider::saveVideoMetaInformation() {
   std::string path = output_prefix + ".bin"; 
   std::ofstream out(path, std::ios::binary);
   if (!out.good()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Failed to open file '" + path + "'");
+    throw std::runtime_error(HL_DEBUG + "Failed to open file '" + path + "'");
   }
   if (!meta_information.SerializeToOstream(&out)) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Failed to write to file '" + path + "'");
+    throw std::runtime_error(HL_DEBUG + "Failed to write to file '" + path + "'");
   }
 }
 
 double OpenCVImageProvider::getStart() const {
   if (indices_by_time_stamp.size() == 0) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " indices_by_time_stamp is empty");
+    throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
   }
   return indices_by_time_stamp.begin()->first;
 }

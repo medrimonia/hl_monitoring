@@ -1,5 +1,6 @@
 #include "hl_monitoring/monitoring_manager.h"
 
+#include <hl_communication/utils.h>
 #include <hl_monitoring/opencv_image_provider.h>
 #include <hl_monitoring/replay_image_provider.h>
 #include <hl_monitoring/utils.h>
@@ -28,7 +29,7 @@ void MonitoringManager::loadConfig(const std::string & path) {
   // Reading Json file
   std::ifstream in(path);
   if (!in.good()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '" + path + "'");
+    throw std::runtime_error(HL_DEBUG + " failed to open file '" + path + "'");
   }
   Json::Value root;
   in >> root;
@@ -68,7 +69,7 @@ std::unique_ptr<ImageProvider> MonitoringManager::buildImageProvider(const Json:
 
 void MonitoringManager::loadImageProviders(const Json::Value & v) {
   if (!v.isObject()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " invalid type for v, expecting an object");
+    throw std::runtime_error(HL_DEBUG + " invalid type for v, expecting an object");
   }
   for (Json::ValueConstIterator it = v.begin(); it != v.end(); it++) {
     const std::string & key = it.name();
@@ -78,7 +79,7 @@ void MonitoringManager::loadImageProviders(const Json::Value & v) {
 
 void MonitoringManager::loadMessageManager(const Json::Value & v) {
   if (!v.isObject()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " invalid type for v, expecting an object");
+    throw std::runtime_error(HL_DEBUG + " invalid type for v, expecting an object");
   }
   std::string file_path;
   int port_read = -1;
@@ -87,9 +88,9 @@ void MonitoringManager::loadMessageManager(const Json::Value & v) {
   bool port_read_set = port_read != -1;
   bool file_path_set = file_path != "";
   if (!port_read_set && !file_path_set) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " neither 'port_read' nor 'file_path' provided");
+    throw std::runtime_error(HL_DEBUG + " neither 'port_read' nor 'file_path' provided");
   } else if (port_read_set && file_path_set) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " both 'port_read' and 'file_path' provided");
+    throw std::runtime_error(HL_DEBUG + " both 'port_read' and 'file_path' provided");
   } if (port_read_set) {
     message_manager.reset(new MessageManager(port_read));
   } else {

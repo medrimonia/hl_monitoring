@@ -7,6 +7,7 @@
  * - TODO
  */
 
+#include <hl_communication/utils.h>
 #include <hl_monitoring/field.h>
 #include <hl_monitoring/replay_image_provider.h>
 #include <hl_monitoring/utils.h>
@@ -137,7 +138,7 @@ public:
     cvToPose3D(rvec,tvec, &pose);
     std::ofstream out(path, std::ios::binary);
     if (!out.good()) {
-      throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '" + path + "'");
+      throw std::runtime_error(HL_DEBUG + " failed to open file '" + path + "'");
     }
     pose.SerializeToOstream(&out);
   }
@@ -208,7 +209,7 @@ int main(int argc, char ** argv) {
   IntrinsicParameters intrinsic;
   std::ifstream in(intrinsic_arg.getValue());
   if (!in.good()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " failed to open file '"
+    throw std::runtime_error(HL_DEBUG + " failed to open file '"
                              + intrinsic_arg.getValue() + "'");
   }
   intrinsic.ParseFromIstream(&in);

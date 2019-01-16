@@ -1,6 +1,6 @@
 #include "hl_monitoring/replay_image_provider.h"
 
-#include "hl_monitoring/utils.h"
+#include <hl_communication/utils.h>
 
 #include <fstream>
 #include <iostream>
@@ -46,7 +46,7 @@ void ReplayImageProvider::loadMetaInformation(const std::string & meta_informati
   for (int idx = 0; idx < nb_frames; idx++) {
     double time_stamp =  meta_information.frames(idx).time_stamp();
     if (indices_by_time_stamp.count(time_stamp) > 0) {
-      throw std::runtime_error(HL_MONITOR_DEBUG + "Duplicated time_stamp "
+      throw std::runtime_error(HL_DEBUG + "Duplicated time_stamp "
                                + std::to_string(time_stamp));
     }
     indices_by_time_stamp[time_stamp] = idx;
@@ -63,7 +63,7 @@ CalibratedImage ReplayImageProvider::getCalibratedImage(double time_stamp) {
   cv::Mat img;
   video.read(img);
   if (img.empty()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Blank frame has been read");
+    throw std::runtime_error(HL_DEBUG + "Blank frame has been read");
   }
   
   CameraMetaInformation camera_meta;
@@ -90,7 +90,7 @@ cv::Mat ReplayImageProvider::getNextImg() {
   video.read(img);
   index++;
   if (img.empty()) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Blank frame at frame: "
+    throw std::runtime_error(HL_DEBUG + "Blank frame at frame: "
                              + std::to_string(index) + "/" + std::to_string(nb_frames));
   }
   return img;
@@ -107,13 +107,13 @@ bool ReplayImageProvider::isStreamFinished() {
 void ReplayImageProvider::setIndex(int new_index) {
   index = new_index;
   if (!video.set(cv::CAP_PROP_POS_FRAMES, index)) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "Failed to set index to "
+    throw std::runtime_error(HL_DEBUG + "Failed to set index to "
                              + std::to_string(index) + " in video");
   }
 }
 int ReplayImageProvider::getIndex(double time_stamp) const {
   if (indices_by_time_stamp.size() == 0) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + "indices_by_time_stamp is empty");
+    throw std::runtime_error(HL_DEBUG + "indices_by_time_stamp is empty");
   }
   auto it = indices_by_time_stamp.upper_bound(time_stamp);
   if (it == indices_by_time_stamp.end() || it->first > time_stamp) {
@@ -124,7 +124,7 @@ int ReplayImageProvider::getIndex(double time_stamp) const {
 
 double ReplayImageProvider::getStart() const {
   if (indices_by_time_stamp.size() == 0) {
-    throw std::runtime_error(HL_MONITOR_DEBUG + " indices_by_time_stamp is empty");
+    throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
   }
   return indices_by_time_stamp.begin()->first;
 }
