@@ -3,6 +3,10 @@
 #include <hl_communication/utils.h>
 #include <hl_monitoring/utils.h>
 
+#include <opencv2/calib3d.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+
 #include <fstream>
 
 namespace hl_monitoring {
@@ -129,6 +133,39 @@ void Field::updateWhiteLines() {
         points_of_interest["goal_area_corner--"]});
   white_lines.push_back({points_of_interest["goal_area_corner--"],
         points_of_interest["goal_area_t--"]});
+}
+
+void Field::tagLines(const CameraMetaInformation & camera_information, cv::Mat * tag_img,
+                     const cv::Scalar & line_color, double line_thickness) {
+  if (!camera_information.has_camera_parameters() || !camera_information.has_pose()) {
+    throw std::runtime_error(HL_DEBUG + " camera_information is not fully specified");
+  }
+  cv::Mat camera_matrix, distortion_coefficients, rvec, tvec;
+  cv::Size size;
+  intrinsicToCV(camera_information.camera_parameters(),
+                &camera_matrix, &distortion_coefficients, &size);
+  pose3DToCV(camera_information.pose(), &rvec, &tvec);
+  if (size.width != tag_img->cols || size.height != tag_img->rows) {
+    std::ostringstream oss;
+    oss << HL_DEBUG << " size mismatch " << size  << " != " << tag_img->size;
+    throw std::runtime_error(oss.str());
+  }
+  tagLines(camera_matrix, distortion_coefficients, rvec, tvec, tag_img, line_color, line_thickness);
+}
+
+void Field::tagLines(const cv::Mat & camera_matrix, const cv::Mat & distortion_coeffs,
+                     const cv::Mat & rvec, const cv::Mat & tvec, cv::Mat * tag_img,
+                     const cv::Scalar & line_color, double line_thickness) {
+  for (const auto & segment : getWhiteLines()) {
+    std::vector<cv::Point3f> object_points = {segment.first, segment.second};
+    std::vector<cv::Point2f> img_points;
+    cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coeffs, img_points);
+    // When point is outside of image, screw up the drawing
+    cv::Rect img_rect(cv::Point(), tag_img->size());
+    if (img_rect.contains(img_points[0]) && img_rect.contains(img_points[1])) {
+      cv::line(*tag_img, img_points[0], img_points[1], line_color, line_thickness);
+    }
+  }
 }
 
 

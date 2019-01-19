@@ -24,6 +24,11 @@ OpenCVImageProvider::~OpenCVImageProvider() {
   saveVideoMetaInformation();
 }
 
+
+double OpenCVImageProvider::getFPS() const {
+  return input.get(cv::CAP_PROP_FPS);
+}
+
 void OpenCVImageProvider::openInputStream(const std::string & video_path) {
   if (!input.open(video_path)) {
     throw std::runtime_error(HL_DEBUG + " failed to open device '" + video_path + "'");
@@ -49,7 +54,7 @@ void OpenCVImageProvider::openOutputStream(const std::string & output_path) {
   if (!input.isOpened()) {
     throw std::logic_error(HL_DEBUG + " input stream is not open yet");
   }
-  double fps = input.get(cv::CAP_PROP_FPS);
+  double fps = getFPS();
   bool use_color = true;
   output.open(output_path, cv::VideoWriter::fourcc('X','V','I','D'), fps, img_size, use_color);
   if (!output.isOpened()) {

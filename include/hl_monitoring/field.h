@@ -1,5 +1,7 @@
 #pragma once
 
+#include <hl_monitoring/camera.pb.h>
+
 #include <opencv2/core.hpp>
 #include <json/json.h>
 
@@ -50,6 +52,12 @@ public:
 
   const std::map<std::string, cv::Point3f> & getPointsOfInterest() const;
   const std::vector<Segment> & getWhiteLines() const;
+
+  void tagLines(const CameraMetaInformation & camera_information, cv::Mat * tag_img,
+                const cv::Scalar & line_color, double line_thickness);
+  void tagLines(const cv::Mat & camera_matrix, const cv::Mat & distortion_coeffs,
+                const cv::Mat & rvec, const cv::Mat & tvec, cv::Mat * tag_img,
+                const cv::Scalar & line_color, double line_thickness);
 
   /*
    * Radius of the ball [m]

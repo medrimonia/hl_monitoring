@@ -24,6 +24,10 @@ ReplayImageProvider::ReplayImageProvider(const std::string & video_path,
   loadMetaInformation(meta_information_path);
 }
 
+int ReplayImageProvider::getNbFrames() const {
+  return nb_frames;
+}
+
 void ReplayImageProvider::loadVideo(const std::string & video_path) {
   if (!video.open(video_path)) {
     throw std::runtime_error("Failed to open video '" + video_path + "'");

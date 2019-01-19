@@ -92,17 +92,8 @@ public:
       cv::circle(display_img, entry.second, 5, cv::Scalar(0,0,0), -1);
     }
     if (points_in_img.size() >= 4) {
-      for (const auto & segment : field->getWhiteLines()) {
-        std::vector<cv::Point3f> object_points = {segment.first, segment.second};
-        std::vector<cv::Point2f> img_points;
-        cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coefficients,
-                          img_points);
-        // When point is outside of image, screw up the drawing
-        cv::Rect img_rect(cv::Point(), display_img.size());
-        if (img_rect.contains(img_points[0]) && img_rect.contains(img_points[1])) {
-          cv::line(display_img, img_points[0], img_points[1], cv::Scalar(0,0,0), 3);
-        }
-      }
+      field->tagLines(camera_matrix, distortion_coefficients, rvec, tvec, &display_img,
+                      cv::Scalar(0,0,0), 2);
     }
 
     cv::putText(display_img, getTagRequest(), cv::Point(0,30), cv::FONT_HERSHEY_SIMPLEX,
@@ -197,7 +188,6 @@ int main(int argc, char ** argv) {
 
   try {
     cmd.parse(argc, argv);
-    
   } catch (const TCLAP::ArgException & e) {
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
   }

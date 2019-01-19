@@ -5,6 +5,7 @@
  * meta_information are written
  */
 #include <hl_communication/utils.h>
+#include <hl_monitoring/field.h>
 #include <hl_monitoring/monitoring_manager.h>
 #include <hl_monitoring/utils.h>
 
@@ -20,9 +21,12 @@ int main(int argc, char ** argv) {
 
   TCLAP::ValueArg<std::string> config_arg("c", "config", "The path to the json configuration file",
                                           true, "config.json", "string");
+  TCLAP::ValueArg<std::string> field_arg("f", "field", "The path to the json description of the file",
+                                          true, "field.json", "string");
   TCLAP::SwitchArg verbose_arg("v", "verbose", "If enabled display all messages received",
                                cmd, false);
   cmd.add(config_arg);
+  cmd.add(field_arg);
 
   try {
     cmd.parse(argc, argv);
@@ -34,6 +38,9 @@ int main(int argc, char ** argv) {
   MonitoringManager manager;
 
   manager.loadConfig(config_arg.getValue());
+
+  Field field;
+  field.loadFile(field_arg.getValue());
 
   // While exit was not explicitly required, run
   uint64_t now = 0;
@@ -62,6 +69,9 @@ int main(int argc, char ** argv) {
       manager.getCalibratedImages(now);
     for (const auto & entry : images_by_source) {
       cv::Mat display_img = entry.second.getImg().clone();
+      if (entry.second.isFullySpecified()) {
+        field.tagLines(entry.second.getCameraInformation(), &display_img, cv::Scalar(0,0,0), 2);
+      }
       cv::imshow(entry.first, display_img);
     }
     char key = cv::waitKey(10);

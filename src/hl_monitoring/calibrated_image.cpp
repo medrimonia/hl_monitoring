@@ -29,6 +29,11 @@ const cv::Mat & CalibratedImage::getImg() const {
   return img;
 }
 
+const CameraMetaInformation & CalibratedImage::getCameraInformation() const {
+  return camera_meta;
+}
+
+
 bool CalibratedImage::hasCameraParameters() const {
   return camera_meta.has_camera_parameters();
 }
@@ -49,5 +54,10 @@ void CalibratedImage::exportPose(cv::Mat * rvec, cv::Mat * tvec) const {
     pose3DToCV(camera_meta.pose(), rvec, tvec);
   }
 }
+
+bool CalibratedImage::isFullySpecified() const {
+  return hasPose() && hasCameraParameters();
+}
+
 
 }

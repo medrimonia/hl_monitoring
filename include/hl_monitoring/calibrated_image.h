@@ -21,6 +21,8 @@ public:
 
   const cv::Mat & getImg() const;
 
+  const CameraMetaInformation & getCameraInformation() const;
+
   bool hasCameraParameters() const;
   bool hasPose() const;
 
@@ -28,6 +30,11 @@ public:
                               cv::Mat * distortion_coefficients,
                               cv::Size * size) const;
   void exportPose(cv::Mat * rvec, cv::Mat * tvec) const;
+
+  /**
+   * Return true if both pose and camera_parameters are specified
+   */
+  bool isFullySpecified() const;
 
 private:
   cv::Mat img;

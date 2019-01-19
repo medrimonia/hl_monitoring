@@ -92,4 +92,7 @@ if (BUILD_HL_MONITORING_TOOLS)
 
   add_executable(basic_monitoring tools/basic_monitoring.cpp)
   target_link_libraries(basic_monitoring ${PROJECT_NAME} ${LINKED_LIBRARIES})
+
+  add_executable(meta_information_tool tools/meta_information_tool.cpp)
+  target_link_libraries(meta_information_tool ${PROJECT_NAME} ${LINKED_LIBRARIES})
 endif()

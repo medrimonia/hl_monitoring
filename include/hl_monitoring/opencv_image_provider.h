@@ -23,11 +23,10 @@ public:
                       const std::string & output_prefix = "");
   virtual ~OpenCVImageProvider();
 
+  double getFPS() const;
+
   void openInputStream(const std::string & video_path);
   void openOutputStream(const std::string & output_path);
-
-//  void setIntrinsic(const IntrinsicParameters & intrinsic);
-//  void setDefaultPose(const Pose3D & pose);
   
   void restartStream() override;
 
