@@ -1,6 +1,6 @@
 {
     "message_manager" : {
-        "port_read" : 28645
+        "ports" : [3838, 28645]
     },
     "image_providers" : {
         "integrated" : {

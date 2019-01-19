@@ -82,17 +82,28 @@ void MonitoringManager::loadMessageManager(const Json::Value & v) {
     throw std::runtime_error(HL_DEBUG + " invalid type for v, expecting an object");
   }
   std::string file_path;
-  int port_read = -1;
+  std::vector<int> ports;
   tryReadVal(v, "file_path", &file_path);
-  tryReadVal(v, "port_read", &port_read);
-  bool port_read_set = port_read != -1;
+  if (v.isMember("ports")) {
+    if (!v["ports"].isArray()) {
+      throw std::runtime_error(HL_DEBUG + " expecting an array of int for ports");
+    }
+    for (Json::ArrayIndex idx = 0; idx < v["ports"].size(); idx++) {
+      if (!v["ports"][idx].isInt()) {
+        throw std::runtime_error(HL_DEBUG + " value at index " + std::to_string(idx)
+                                 + " of ports is not an int");
+      }
+      ports.push_back(v["ports"][idx].asInt());
+    }
+  }
+  bool ports_set = ports.size() != 0;
   bool file_path_set = file_path != "";
-  if (!port_read_set && !file_path_set) {
-    throw std::runtime_error(HL_DEBUG + " neither 'port_read' nor 'file_path' provided");
-  } else if (port_read_set && file_path_set) {
-    throw std::runtime_error(HL_DEBUG + " both 'port_read' and 'file_path' provided");
-  } if (port_read_set) {
-    message_manager.reset(new MessageManager(port_read));
+  if (!ports_set && !file_path_set) {
+    throw std::runtime_error(HL_DEBUG + " neither 'ports' nor 'file_path' provided");
+  } else if (ports_set && file_path_set) {
+    throw std::runtime_error(HL_DEBUG + " both 'ports' and 'file_path' provided");
+  } if (ports_set) {
+    message_manager.reset(new MessageManager(ports));
   } else {
     message_manager.reset(new MessageManager(file_path));
   }
