@@ -20,6 +20,8 @@ int main(int argc, char ** argv) {
 
   TCLAP::ValueArg<std::string> config_arg("c", "config", "The path to the json configuration file",
                                           true, "config.json", "string");
+  TCLAP::SwitchArg verbose_arg("v", "verbose", "If enabled display all messages received",
+                               cmd, false);
   cmd.add(config_arg);
 
   try {
@@ -47,11 +49,13 @@ int main(int argc, char ** argv) {
       now += dt;
     }
 
-    std::cout << "Time: " << std::setprecision(15) << now << std::endl;
-    MessageManager::Status status = manager.getStatus(now);
-    for (const auto & robot_entry : status.robot_messages) {
-      std::cout << "-> Message from robot " << robot_entry.first.robot_id()
-                << " from team " << robot_entry.first.team_id() << std::endl;
+    if (verbose_arg.getValue()) {
+      std::cout << "Time: " <<  now << std::endl;
+      MessageManager::Status status = manager.getStatus(now);
+      for (const auto & robot_entry : status.robot_messages) {
+        std::cout << "-> Message from robot " << robot_entry.first.robot_id()
+                  << " from team " << robot_entry.first.team_id() << std::endl;
+      }
     }
     
     std::map<std::string, CalibratedImage> images_by_source =
