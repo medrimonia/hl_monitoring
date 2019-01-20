@@ -29,6 +29,9 @@ void cvToPose3D(const cv::Mat & rvec,
                 const cv::Mat & tvec,
                 Pose3D * pose);
 
+cv::Point2f fieldToImg(const cv::Point3f & pos_in_field,
+                       const CameraMetaInformation & camera_information);
+
 void checkMember(const Json::Value & v, const std::string & key);
 
 /**

@@ -2,6 +2,8 @@
 
 #include <hl_communication/utils.h>
 
+#include <opencv2/calib3d.hpp>
+
 namespace hl_monitoring
 {
 
@@ -65,6 +67,22 @@ void cvToPose3D(const cv::Mat & rvec,
     pose->add_rotation(rvec.at<double>(i,0));
     pose->add_translation(tvec.at<double>(i,0));
   }
+}
+
+cv::Point2f fieldToImg(const cv::Point3f & pos_in_field,
+                       const CameraMetaInformation & camera_information) {
+  if (!camera_information.has_camera_parameters() || !camera_information.has_pose()) {
+    throw std::runtime_error(HL_DEBUG + " camera_information is not fully specified");
+  }
+  cv::Mat camera_matrix, distortion_coeffs, rvec, tvec;
+  cv::Size size;
+  intrinsicToCV(camera_information.camera_parameters(),
+                &camera_matrix, &distortion_coeffs, &size);
+  pose3DToCV(camera_information.pose(), &rvec, &tvec);
+  std::vector<cv::Point3f> object_points = {pos_in_field};
+  std::vector<cv::Point2f> img_points;
+  cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coeffs, img_points);
+  return img_points[0];
 }
 
 void checkMember(const Json::Value & v, const std::string & key)
