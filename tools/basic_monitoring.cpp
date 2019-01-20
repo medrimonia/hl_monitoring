@@ -95,7 +95,8 @@ int main(int argc, char ** argv) {
               const Perception & perception = robot_entry.second.perception();
               for (int pos_idx = 0; pos_idx < perception.self_in_field_size(); pos_idx++) {
                 const WeightedPose & weighted_pose = perception.self_in_field(pos_idx);
-                cv::Point3f pos_in_field(weighted_pose.pose().x(), weighted_pose.pose().y(), 0.0);
+                const PositionDistribution & position = weighted_pose.pose().position();
+                cv::Point3f pos_in_field(position.x(), position.y(), 0.0);
                 cv::Point2f pos_in_img = fieldToImg(pos_in_field, camera_information);
                 int circle_size = 10;
                 cv::circle(display_img, pos_in_img, circle_size, color, cv::FILLED);
