@@ -36,6 +36,9 @@ public:
 
   uint64_t getStart() const override;
 
+  void setIntrinsic(const IntrinsicParameters & params) override;
+  void setDefaultPose(const Pose3D & pose) override;
+
 private:
   /**
    * The video read from the file

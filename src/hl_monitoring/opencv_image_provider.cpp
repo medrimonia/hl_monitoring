@@ -144,4 +144,12 @@ uint64_t OpenCVImageProvider::getStart() const {
   return indices_by_time_stamp.begin()->first;
 }
 
+void OpenCVImageProvider::setIntrinsic(const IntrinsicParameters & params) {
+  meta_information.mutable_camera_parameters()->CopyFrom(params);
+}
+
+void OpenCVImageProvider::setDefaultPose(const Pose3D & pose) {
+  meta_information.mutable_default_pose()->CopyFrom(pose);
+}
+
 }

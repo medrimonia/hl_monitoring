@@ -58,7 +58,7 @@ int main(int argc, char ** argv) {
     }
 
     MessageManager::Status status = manager.getStatus(now);
-    std::vector<cv::Scalar> team_colors = {cv::Scalar(255,0,255), cv::Scalar(255,255,0)};
+    std::vector<cv::Scalar> team_colors = {cv::Scalar(255,255,0), cv::Scalar(255,0,255)};
     std::map<uint32_t,cv::Scalar> colors_by_team;
     for (int idx = 0; idx < status.gc_message.teams_size(); idx++) {
       const GCTeamMsg & team_msg = status.gc_message.teams(idx);
@@ -71,10 +71,15 @@ int main(int argc, char ** argv) {
 
     if (verbose_arg.getValue()) {
       std::cout << "Time: " <<  now << std::endl;
+      std::cout << "-> GameController message" << std::endl
+                << status.gc_message.DebugString() << std::endl;
       for (const auto & robot_entry : status.robot_messages) {
         std::cout << "-> Message from robot " << robot_entry.first.robot_id()
                   << " from team " << robot_entry.first.team_id() << std::endl;
+        std::cout << "  -> Estimated pose: "
+                  << robot_entry.second.perception().DebugString() << std::endl;
       }
+      
     }
     
     std::map<std::string, CalibratedImage> images_by_source =
@@ -87,20 +92,24 @@ int main(int argc, char ** argv) {
         // Basic drawing of robot estimated position
         for (const auto & robot_entry : status.robot_messages) {
           uint32_t team_id = robot_entry.first.team_id();
+          cv::Scalar color = cv::Scalar(0,0,0);
           if (colors_by_team.count(team_id) == 0) {
-            std::cerr << "Unknown color for team " << team_id << std::endl;
+            std::cerr << "Unknown color for team " << team_id
+                      << ": using black (default)" << std::endl;
           } else {
-            const cv::Scalar & color = colors_by_team[team_id];
-            if (robot_entry.second.has_perception()) {
-              const Perception & perception = robot_entry.second.perception();
-              for (int pos_idx = 0; pos_idx < perception.self_in_field_size(); pos_idx++) {
-                const WeightedPose & weighted_pose = perception.self_in_field(pos_idx);
-                const PositionDistribution & position = weighted_pose.pose().position();
-                cv::Point3f pos_in_field(position.x(), position.y(), 0.0);
-                cv::Point2f pos_in_img = fieldToImg(pos_in_field, camera_information);
-                int circle_size = 10;
-                cv::circle(display_img, pos_in_img, circle_size, color, cv::FILLED);
-              }
+            color = colors_by_team[team_id];
+          }
+          if (robot_entry.second.has_perception()) {
+            const Perception & perception = robot_entry.second.perception();
+            for (int pos_idx = 0; pos_idx < perception.self_in_field_size(); pos_idx++) {
+              const WeightedPose & weighted_pose = perception.self_in_field(pos_idx);
+              const PositionDistribution & position = weighted_pose.pose().position();
+              cv::Point3f pos_in_field(position.x(), position.y(), 0.0);
+              cv::Point2f pos_in_img = fieldToImg(pos_in_field, camera_information);
+              int circle_size = 10;
+              cv::circle(display_img, pos_in_img, circle_size, color, cv::FILLED);
+              double angle = weighted_pose.pose().dir().mean();
+              std::cout << "Dir: " << angle << std::endl;
             }
           }
         }

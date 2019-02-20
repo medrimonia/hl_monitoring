@@ -7,6 +7,10 @@
 
 #include <fstream>
 
+#ifdef HL_MONITORING_USES_FLYCAPTURE
+#include <hl_monitoring/flycap_image_provider.h>
+#endif
+
 using namespace hl_communication;
 
 namespace hl_monitoring
@@ -44,12 +48,14 @@ void MonitoringManager::loadConfig(const std::string & path) {
 
 std::unique_ptr<ImageProvider> MonitoringManager::buildImageProvider(const Json::Value & v) {
   checkMember(v, "class_name");
-  checkMember(v, "input_path");
   std::unique_ptr<ImageProvider> result;
-  std::string class_name, input_path;
+  std::string class_name, input_path, intrinsic_path, default_pose_path;
   readVal(v,"class_name", &class_name);
-  readVal(v,"input_path", &input_path);
+  tryReadVal(v,"intrinsic_path", &intrinsic_path);
+  tryReadVal(v,"default_pose_path", &default_pose_path);
   if (class_name == "OpenCVImageProvider") {
+    checkMember(v, "input_path");
+    readVal(v,"input_path", &input_path);
     std::string output_prefix;
     if (v.isMember("output_prefix")) {
       result.reset(new OpenCVImageProvider(input_path, v["output_prefix"].asString()));
@@ -57,12 +63,39 @@ std::unique_ptr<ImageProvider> MonitoringManager::buildImageProvider(const Json:
       result.reset(new OpenCVImageProvider(input_path));
     }
   } else if (class_name == "ReplayImageProvider") {
+    checkMember(v, "input_path");
+    readVal(v,"input_path", &input_path);
     std::string meta_information_path;
     if (v.isMember("meta_information_path")) {
       result.reset(new ReplayImageProvider(input_path, v["meta_information_path"].asString()));
     } else {
       result.reset(new ReplayImageProvider(input_path));
     }
+  }
+#ifdef HL_MONITORING_USES_FLYCAPTURE
+  else if (class_name == "FlyCapImageProvider") {
+    checkMember(v, "parameters");
+    const Json::Value & parameters = v["parameters"];
+    std::string output_prefix;
+    if (v.isMember("output_prefix")) {
+      result.reset(new FlyCapImageProvider(parameters, v["output_prefix"].asString()));
+    } else { 
+      result.reset(new FlyCapImageProvider(parameters));
+    }
+  }
+#endif
+  else {
+    throw std::runtime_error(HL_DEBUG + "unknown class: '" + class_name + "'");
+  }
+  if (intrinsic_path != "") {
+    IntrinsicParameters intrinsic_params;
+    readFromFile(intrinsic_path, &intrinsic_params);
+    result->setIntrinsic(intrinsic_params);
+  }
+  if (default_pose_path != "") {
+    Pose3D pose;
+    readFromFile(default_pose_path, &pose);
+    result->setDefaultPose(pose);
   }
   return result;
 }
