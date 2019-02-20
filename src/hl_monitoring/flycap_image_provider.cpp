@@ -155,14 +155,25 @@ void FlyCapImageProvider::update() {
 
 cv::Mat FlyCapImageProvider::getNextImg() {
   FlyCapture2::Image fc_image;
-  FlyCapture2::Error error = camera.RetrieveBuffer(&fc_image);
+  bool retry = true;
+  while (retry) {
+    FlyCapture2::Error error = camera.RetrieveBuffer(&fc_image);
+    if (error == FlyCapture2::PGRERROR_TIMEOUT) {
+      std::cerr << HL_DEBUG << "Retrieve buffer timed out" << std::endl;
+    }
+    else if (error != FlyCapture2::PGRERROR_OK) {
+      std::cerr << HL_DEBUG << "Failed buffer retrieval" << error.GetDescription() << std::endl;
+    } else {
+      retry = false;
+    }
+  }
 
   uint64_t time_stamp = getTimeStamp();
   
   unsigned int bytes_per_row =
       fc_image.GetReceivedDataSize() / fc_image.GetRows();
   cv::Mat tmp_img = cv::Mat(fc_image.GetRows(), fc_image.GetCols(), CV_8UC3,
-                            fc_image.GetData(), bytes_per_row);
+                            fc_image.GetData(), bytes_per_row).clone();
   if (tmp_img.empty()) {
     throw std::runtime_error(HL_DEBUG + "Blank frame at frame: "
                              + std::to_string(index) + "/" + std::to_string(nb_frames));
