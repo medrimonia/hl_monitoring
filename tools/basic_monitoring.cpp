@@ -88,7 +88,7 @@ int main(int argc, char ** argv) {
       cv::Mat display_img = entry.second.getImg().clone();
       if (entry.second.isFullySpecified()) {
         const CameraMetaInformation & camera_information = entry.second.getCameraInformation();
-        field.tagLines(camera_information, &display_img, cv::Scalar(0,0,0), 2);
+        field.tagLines(camera_information, &display_img, cv::Scalar(0,0,0), 1, 10);
         // Basic drawing of robot estimated position
         for (const auto & robot_entry : status.robot_messages) {
           uint32_t team_id = robot_entry.first.team_id();
@@ -109,7 +109,6 @@ int main(int argc, char ** argv) {
               int circle_size = 10;
               cv::circle(display_img, pos_in_img, circle_size, color, cv::FILLED);
               double angle = weighted_pose.pose().dir().mean();
-              std::cout << "Dir: " << angle << std::endl;
             }
           }
         }

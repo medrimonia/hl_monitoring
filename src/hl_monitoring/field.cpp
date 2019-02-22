@@ -136,7 +136,7 @@ void Field::updateWhiteLines() {
 }
 
 void Field::tagLines(const CameraMetaInformation & camera_information, cv::Mat * tag_img,
-                     const cv::Scalar & line_color, double line_thickness) {
+                     const cv::Scalar & line_color, double line_thickness, int nb_segments) {
   if (!camera_information.has_camera_parameters() || !camera_information.has_pose()) {
     throw std::runtime_error(HL_DEBUG + " camera_information is not fully specified");
   }
@@ -150,20 +150,25 @@ void Field::tagLines(const CameraMetaInformation & camera_information, cv::Mat *
     oss << HL_DEBUG << " size mismatch " << size  << " != " << tag_img->size;
     throw std::runtime_error(oss.str());
   }
-  tagLines(camera_matrix, distortion_coefficients, rvec, tvec, tag_img, line_color, line_thickness);
+  tagLines(camera_matrix, distortion_coefficients, rvec, tvec, tag_img,
+           line_color, line_thickness, nb_segments);
 }
 
 void Field::tagLines(const cv::Mat & camera_matrix, const cv::Mat & distortion_coeffs,
                      const cv::Mat & rvec, const cv::Mat & tvec, cv::Mat * tag_img,
-                     const cv::Scalar & line_color, double line_thickness) {
+                     const cv::Scalar & line_color, double line_thickness, int nb_segments) {
   for (const auto & segment : getWhiteLines()) {
-    std::vector<cv::Point3f> object_points = {segment.first, segment.second};
-    std::vector<cv::Point2f> img_points;
-    cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coeffs, img_points);
-    // When point is outside of image, screw up the drawing
-    cv::Rect img_rect(cv::Point(), tag_img->size());
-    if (img_rect.contains(img_points[0]) && img_rect.contains(img_points[1])) {
-      cv::line(*tag_img, img_points[0], img_points[1], line_color, line_thickness);
+    cv::Point3f object_diff = segment.second - segment.first;
+    for (int i = 0; i < nb_segments; i++) {
+      std::vector<cv::Point3f> object_points = {segment.first + i * object_diff / nb_segments,
+                                                segment.first + (i+1) * object_diff / nb_segments};
+      std::vector<cv::Point2f> img_points;
+      cv::projectPoints(object_points, rvec, tvec, camera_matrix, distortion_coeffs, img_points);
+      // When point is outside of image, screw up the drawing
+      cv::Rect img_rect(cv::Point(), tag_img->size());
+      if (img_rect.contains(img_points[0]) && img_rect.contains(img_points[1])) {
+        cv::line(*tag_img, img_points[0], img_points[1], line_color, line_thickness);
+      }
     }
   }
 }
