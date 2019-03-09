@@ -176,6 +176,21 @@ hl_communication::MessageManager::Status MonitoringManager::getStatus(uint64_t t
   
 }
 
+const ImageProvider & MonitoringManager::getImageProvider(const std::string & name) const {
+  if (image_providers.count(name) == 0) {
+    throw std::out_of_range(HL_DEBUG + " no image provider named '" + name + "'");
+  }
+  return *(image_providers.at(name));
+}
+
+std::set<std::string> MonitoringManager::getImageProvidersNames() const {
+  std::set<std::string> names;
+  for (const auto & entry : image_providers) {
+    names.insert(entry.first);
+  }
+  return names;
+}
+
 uint64_t MonitoringManager::getStart() const {
   uint64_t min_ts = std::numeric_limits<uint64_t>::max();
   min_ts = std::min(min_ts, message_manager->getStart());

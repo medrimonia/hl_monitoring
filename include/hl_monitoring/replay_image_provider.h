@@ -16,7 +16,7 @@ public:
   ReplayImageProvider(const std::string & video_path,
                       const std::string & meta_information_path);
 
-  int getNbFrames() const;
+  size_t getNbFrames() const override;
 
   void loadVideo(const std::string & video_path);
   void loadMetaInformation(const std::string & meta_information_path);

@@ -42,6 +42,8 @@ public:
 
   uint64_t getStart() const override;
 
+  virtual size_t getNbFrames() const;
+
   /**
    * Add/replace parameters of the camera
    */

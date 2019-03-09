@@ -40,6 +40,14 @@ public:
   hl_communication::MessageManager::Status getStatus(uint64_t time_stamp);
 
   /**
+   * Returns non-mutable access to the given image provider if it exists.
+   * throws std::out_of_range if name is not valid.
+   */
+  const ImageProvider & getImageProvider(const std::string & name) const;
+
+  std::set<std::string> getImageProvidersNames() const;
+
+  /**
    * Return the first time_stamp found in messages and video streams
    */
   uint64_t getStart() const;

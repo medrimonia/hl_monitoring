@@ -91,6 +91,8 @@ public:
    */
   void setPixelFormat(FlyCapture2::PixelFormat pixel_format);
 
+  size_t getNbFrames() const override;
+
   /**
    * Add/replace parameters of the camera
    */

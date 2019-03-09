@@ -144,6 +144,10 @@ uint64_t OpenCVImageProvider::getStart() const {
   return indices_by_time_stamp.begin()->first;
 }
 
+size_t OpenCVImageProvider::getNbFrames() const {
+  return nb_frames;
+}
+
 void OpenCVImageProvider::setIntrinsic(const IntrinsicParameters & params) {
   meta_information.mutable_camera_parameters()->CopyFrom(params);
 }

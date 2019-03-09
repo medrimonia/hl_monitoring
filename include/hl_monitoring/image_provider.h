@@ -41,6 +41,11 @@ public:
    */
   virtual uint64_t getStart() const = 0;
 
+  /**
+   * Returns the number of frames currently available in the image provider
+   */
+  virtual size_t getNbFrames() const = 0;
+
   virtual void setIntrinsic(const IntrinsicParameters & params) = 0;
   virtual void setDefaultPose(const Pose3D & pose) = 0;
 };

@@ -329,6 +329,11 @@ void FlyCapImageProvider::setDefaultPose(const Pose3D & pose) {
   meta_information.mutable_default_pose()->CopyFrom(pose);
 }
 
+size_t FlyCapImageProvider::getNbFrames() const {
+  return nb_frames;
+}
+
+
 FlyCapture2::Property getDefaultProperty(FlyCapture2::PropertyType type)
 {
   FlyCapture2::Property p;

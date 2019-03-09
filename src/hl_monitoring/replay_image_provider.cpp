@@ -24,7 +24,7 @@ ReplayImageProvider::ReplayImageProvider(const std::string & video_path,
   loadMetaInformation(meta_information_path);
 }
 
-int ReplayImageProvider::getNbFrames() const {
+size_t ReplayImageProvider::getNbFrames() const {
   return nb_frames;
 }
 
