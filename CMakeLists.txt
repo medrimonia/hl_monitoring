@@ -63,6 +63,7 @@ endif(HL_MONITORING_USES_FLYCAPTURE)
 catkin_package(
   INCLUDE_DIRS ${DELEGATE_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME} ${DELEGATE_LIBRARIES}
+  CATKIN_DEPENDS hl_communication
   )
 
 include_directories(${DELEGATE_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} )
@@ -84,7 +85,6 @@ endforeach (DIRECTORY)
 
 set(LINKED_LIBRARIES ${catkin_LIBRARIES} ${DELEGATE_LIBRARIES})
 
-#Build the kid_size main library
 add_library (${PROJECT_NAME} SHARED ${PROTO_SOURCES} ${ALL_SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LINKED_LIBRARIES})
 
