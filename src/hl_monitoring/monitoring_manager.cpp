@@ -212,5 +212,34 @@ bool MonitoringManager::isLive() const {
   return live;
 }
 
+void MonitoringManager::setOffset(int64 offset) {
+  if (message_manager) {
+    message_manager->setOffset(offset);
+  }
+  for (auto & ip : image_providers) {
+    ip.second->setOffset(offset);
+  }
+}
+
+int64 MonitoringManager::getOffset() const {
+  std::vector<int64_t> offsets;
+  if (message_manager) {
+    offsets.push_back(message_manager->getOffset());
+  }
+  for (const auto & entry : image_providers) {
+    offsets.push_back(entry.second->getOffset());
+  }
+  if (offsets.size() == 0) {
+    return 0;
+  }
+  int64_t sum_offset = 0;
+  int nb_offsets = 0;
+  for (int64_t offset : offsets) {
+    sum_offset += offset;
+  }
+  //TODO: add a mechanism to watch potential overflows on sum_offset;
+  int64_t mean_offset = sum_offset / nb_offsets;
+  return mean_offset;
+}
 
 }

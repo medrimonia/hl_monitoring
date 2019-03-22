@@ -221,13 +221,6 @@ void FlyCapImageProvider::saveVideoMetaInformation() {
   }
 }
 
-uint64_t FlyCapImageProvider::getStart() const {
-  if (indices_by_time_stamp.size() == 0) {
-    throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
-  }
-  return indices_by_time_stamp.begin()->first;
-}
-
 void FlyCapImageProvider::updatePacketProperties() {
   // Prepare packets
   // Using larger packets reduces the number of CPU interruptions
@@ -320,19 +313,6 @@ void FlyCapImageProvider::setPixelFormat(FlyCapture2::PixelFormat pixel_format) 
                           + error.GetDescription());
   }
 }
-
-void FlyCapImageProvider::setIntrinsic(const IntrinsicParameters & params) {
-  meta_information.mutable_camera_parameters()->CopyFrom(params);
-}
-
-void FlyCapImageProvider::setDefaultPose(const Pose3D & pose) {
-  meta_information.mutable_default_pose()->CopyFrom(pose);
-}
-
-size_t FlyCapImageProvider::getNbFrames() const {
-  return nb_frames;
-}
-
 
 FlyCapture2::Property getDefaultProperty(FlyCapture2::PropertyType type)
 {

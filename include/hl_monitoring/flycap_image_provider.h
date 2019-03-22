@@ -54,8 +54,6 @@ public:
 
   void saveVideoMetaInformation();
 
-  uint64_t getStart() const override;
-
   void updateProperty(const FlyCapture2::Property & wished_property);
   void applyWishedProperties();
   
@@ -91,13 +89,6 @@ public:
    */
   void setPixelFormat(FlyCapture2::PixelFormat pixel_format);
 
-  size_t getNbFrames() const override;
-
-  /**
-   * Add/replace parameters of the camera
-   */
-  void setIntrinsic(const IntrinsicParameters & params) override;
-  void setDefaultPose(const Pose3D & pose) override;
 private:
   /**
    * PtGrey camera
@@ -115,11 +106,6 @@ private:
   cv::VideoWriter output;
 
   /**
-   * Information relevant
-   */
-  VideoMetaInformation meta_information;
-
-  /**
    * Last img read
    */
   cv::Mat img;
@@ -128,21 +114,6 @@ private:
    * Size of the images provided by the camera
    */
   cv::Size img_size;
-
-  /**
-   * Provide access to index using time_stamps
-   */
-  std::map<uint64_t, int> indices_by_time_stamp;
-
-  /**
-   * Index of the next image read in the video
-   */
-  int index;
-
-  /**
-   * The number of frames in the video
-   */
-  int nb_frames;
 
   /**
    * Required frame_rate

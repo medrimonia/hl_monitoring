@@ -9,7 +9,6 @@ namespace hl_monitoring
 {
 
 ReplayImageProvider::ReplayImageProvider()
-  : index(0), nb_frames(0)
 {
 }
 
@@ -22,10 +21,6 @@ ReplayImageProvider::ReplayImageProvider(const std::string & video_path,
                                          const std::string & meta_information_path) {
   loadVideo(video_path);
   loadMetaInformation(meta_information_path);
-}
-
-size_t ReplayImageProvider::getNbFrames() const {
-  return nb_frames;
 }
 
 void ReplayImageProvider::loadVideo(const std::string & video_path) {
@@ -115,6 +110,7 @@ void ReplayImageProvider::setIndex(int new_index) {
                              + std::to_string(index) + " in video");
   }
 }
+
 int ReplayImageProvider::getIndex(uint64_t time_stamp) const {
   if (indices_by_time_stamp.size() == 0) {
     throw std::runtime_error(HL_DEBUG + "indices_by_time_stamp is empty");
@@ -124,21 +120,6 @@ int ReplayImageProvider::getIndex(uint64_t time_stamp) const {
     it--;
   }
   return it->second;
-}
-
-uint64_t ReplayImageProvider::getStart() const {
-  if (indices_by_time_stamp.size() == 0) {
-    throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
-  }
-  return indices_by_time_stamp.begin()->first;
-}
-
-void ReplayImageProvider::setIntrinsic(const IntrinsicParameters & params) {
-  meta_information.mutable_camera_parameters()->CopyFrom(params);
-}
-
-void ReplayImageProvider::setDefaultPose(const Pose3D & pose) {
-  meta_information.mutable_default_pose()->CopyFrom(pose);
 }
 
 }

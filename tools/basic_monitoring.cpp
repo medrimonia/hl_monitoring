@@ -48,6 +48,7 @@ int main(int argc, char ** argv) {
   uint64_t dt = 30 * 1000;//[microseconds]
   if (!manager.isLive()) {
     now = manager.getStart();
+    manager.setOffset(getSteadyClockOffset());
   }
   while(manager.isGood()) {
     manager.update();

@@ -56,6 +56,18 @@ public:
 
   bool isLive() const;
 
+  /**
+   * Set the offset in us between steady_clock and system_clock [us] (time_since_epoch)
+   */
+  void setOffset(int64 offset);
+
+  /**
+   * Get the offset in us between steady_clock and system_clock [us] (time_since_epoch)
+   * - return 0 if there are no elements with offsets
+   * - Might display an error message if an overflow occured
+   */
+  int64_t getOffset() const;
+
 private:
   /**
    * Access to message from both, robots and GameController

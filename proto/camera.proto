@@ -81,4 +81,9 @@ message VideoMetaInformation {
    * Contains information about each frame of the video
    */
   repeated FrameEntry frames = 3;
+  /**
+   * Offset between clock used for internal time_stamps and UTC time_stamp:
+   * frame.time_stamp + time_offset = utc_time_stamp
+   */
+  optional int64 time_offset = 4;
 }

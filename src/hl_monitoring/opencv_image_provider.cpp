@@ -137,23 +137,4 @@ void OpenCVImageProvider::saveVideoMetaInformation() {
   }
 }
 
-uint64_t OpenCVImageProvider::getStart() const {
-  if (indices_by_time_stamp.size() == 0) {
-    throw std::runtime_error(HL_DEBUG + " indices_by_time_stamp is empty");
-  }
-  return indices_by_time_stamp.begin()->first;
-}
-
-size_t OpenCVImageProvider::getNbFrames() const {
-  return nb_frames;
-}
-
-void OpenCVImageProvider::setIntrinsic(const IntrinsicParameters & params) {
-  meta_information.mutable_camera_parameters()->CopyFrom(params);
-}
-
-void OpenCVImageProvider::setDefaultPose(const Pose3D & pose) {
-  meta_information.mutable_default_pose()->CopyFrom(pose);
-}
-
 }

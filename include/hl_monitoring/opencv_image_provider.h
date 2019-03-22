@@ -11,7 +11,7 @@ namespace hl_monitoring
 /**
  * Use OpenCV standard API to open a video stream
  * - Images read can be directly encoded in a video
- * - Timestamps are based on acquisition time
+ * - Timestamps are based on the steady clock acquisition time, not time_since_epoch
  */
 class OpenCVImageProvider : public ImageProvider {
 public:
@@ -40,15 +40,6 @@ public:
 
   void saveVideoMetaInformation();
 
-  uint64_t getStart() const override;
-
-  virtual size_t getNbFrames() const;
-
-  /**
-   * Add/replace parameters of the camera
-   */
-  void setIntrinsic(const IntrinsicParameters & params) override;
-  void setDefaultPose(const Pose3D & pose) override;
 private:
   /**
    * The video read from the file
@@ -61,11 +52,6 @@ private:
   cv::VideoWriter output;
 
   /**
-   * Information relevant
-   */
-  VideoMetaInformation meta_information;
-
-  /**
    * Last img read
    */
   cv::Mat img;
@@ -75,20 +61,6 @@ private:
    */
   cv::Size img_size;
 
-  /**
-   * Provide access to index using time_stamps
-   */
-  std::map<uint64_t, int> indices_by_time_stamp;
-
-  /**
-   * Index of the next image read in the video
-   */
-  int index;
-
-  /**
-   * The number of frames in the video
-   */
-  int nb_frames;
 
   /**
    * The prefix used for writing video file and meta_information file. If empty,

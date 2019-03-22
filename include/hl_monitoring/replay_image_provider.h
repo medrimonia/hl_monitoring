@@ -16,8 +16,6 @@ public:
   ReplayImageProvider(const std::string & video_path,
                       const std::string & meta_information_path);
 
-  size_t getNbFrames() const override;
-
   void loadVideo(const std::string & video_path);
   void loadMetaInformation(const std::string & meta_information_path);
 
@@ -34,36 +32,11 @@ public:
   void setIndex(int index);
   int getIndex(uint64_t time_stamp) const;
 
-  uint64_t getStart() const override;
-
-  void setIntrinsic(const IntrinsicParameters & params) override;
-  void setDefaultPose(const Pose3D & pose) override;
-
 private:
   /**
    * The video read from the file
    */
   cv::VideoCapture video;
-
-  /**
-   * Information relevant
-   */
-  VideoMetaInformation meta_information;
-
-  /**
-   * Provide access to index using time_stamps
-   */
-  std::map<uint64_t, int> indices_by_time_stamp;
-
-  /**
-   * Index of the next image read in the video
-   */
-  int index;
-
-  /**
-   * The number of frames in the video
-   */
-  int nb_frames;
 };
 
 }
