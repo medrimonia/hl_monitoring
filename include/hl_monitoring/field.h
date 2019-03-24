@@ -5,8 +5,8 @@
 #include <opencv2/core.hpp>
 #include <json/json.h>
 
-namespace hl_monitoring {
-
+namespace hl_monitoring
+{
 /**
  * Contains all the information about the size of the field, also allows to
  * retrieve points of interest
@@ -39,25 +39,25 @@ namespace hl_monitoring {
  *
  * - All field informations are in meters
  */
-class Field {
+class Field
+{
 public:
-
   typedef std::pair<cv::Point3f, cv::Point3f> Segment;
 
   Field();
 
   Json::Value toJson() const;
-  void fromJson(const Json::Value & v);
-  void loadFile(const std::string & path);
+  void fromJson(const Json::Value& v);
+  void loadFile(const std::string& path);
 
-  const std::map<std::string, cv::Point3f> & getPointsOfInterest() const;
-  const std::vector<Segment> & getWhiteLines() const;
+  const std::map<std::string, cv::Point3f>& getPointsOfInterest() const;
+  const std::vector<Segment>& getWhiteLines() const;
 
-  void tagLines(const CameraMetaInformation & camera_information, cv::Mat * tag_img,
-                const cv::Scalar & line_color, double line_thickness, int nb_segments = 1);
-  void tagLines(const cv::Mat & camera_matrix, const cv::Mat & distortion_coeffs,
-                const cv::Mat & rvec, const cv::Mat & tvec, cv::Mat * tag_img,
-                const cv::Scalar & line_color, double line_thickness, int nb_segments = 1);
+  void tagLines(const CameraMetaInformation& camera_information, cv::Mat* tag_img, const cv::Scalar& line_color,
+                double line_thickness, int nb_segments = 1);
+  void tagLines(const cv::Mat& camera_matrix, const cv::Mat& distortion_coeffs, const cv::Mat& rvec,
+                const cv::Mat& tvec, cv::Mat* tag_img, const cv::Scalar& line_color, double line_thickness,
+                int nb_segments = 1);
 
   /*
    * Radius of the ball [m]
@@ -118,15 +118,13 @@ public:
    *  From one side of the field to the other (lines included) [m]
    */
   double field_width;
-  
 
 private:
-  
   /**
    * Synchronize the points of interests with current size of the field
    */
   void updatePointsOfInterest();
-  
+
   /**
    * Synchronize the white lines based on the points of interests
    */
@@ -144,4 +142,4 @@ private:
   std::vector<Segment> white_lines;
 };
 
-}
+}  // namespace hl_monitoring

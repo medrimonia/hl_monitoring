@@ -4,19 +4,20 @@
 
 namespace hl_monitoring
 {
-
-class ImageProvider {
+class ImageProvider
+{
 public:
-
   ImageProvider();
 
-  virtual ~ImageProvider(){}
+  virtual ~ImageProvider()
+  {
+  }
 
   /**
    * Return to the first frame of the stream, throw error on live stream
    */
   virtual void restartStream() = 0;
-  
+
   /**
    * Return an image along with associated intrinsic and extrinsic parameters
    */
@@ -41,7 +42,7 @@ public:
 
   /**
    * Return true if the last image of the stream has been reached.
-   * For live streams, means that the camera has been disconnected 
+   * For live streams, means that the camera has been disconnected
    */
   virtual bool isStreamFinished() = 0;
 
@@ -56,8 +57,8 @@ public:
    */
   virtual size_t getNbFrames() const;
 
-  virtual void setIntrinsic(const IntrinsicParameters & params);
-  virtual void setDefaultPose(const Pose3D & pose);
+  virtual void setIntrinsic(const IntrinsicParameters& params);
+  virtual void setDefaultPose(const Pose3D& pose);
 
   /**
    * Set the offset in us between steady_clock and system_clock (time_since_epoch)
@@ -69,7 +70,7 @@ public:
    */
   int64_t getOffset() const;
 
-protected:  
+protected:
   /**
    * Information relevant to the video stream
    */
@@ -91,4 +92,4 @@ protected:
   int nb_frames;
 };
 
-}
+}  // namespace hl_monitoring

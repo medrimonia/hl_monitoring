@@ -9,20 +9,21 @@
 
 using namespace hl_monitoring;
 
-int main(int argc, char ** argv) {
+int main(int argc, char** argv)
+{
   TCLAP::CmdLine cmd("Record a video based on OpenCV input", ' ', "0.9");
 
-  TCLAP::ValueArg<std::string> video_arg("i", "input", "The path to the input", true,
-                                         "/dev/video0", "string");
-  TCLAP::ValueArg<std::string> output_arg("o", "output", "The path to the output video", true,
-                                          "output.avi", "string");
+  TCLAP::ValueArg<std::string> video_arg("i", "input", "The path to the input", true, "/dev/video0", "string");
+  TCLAP::ValueArg<std::string> output_arg("o", "output", "The path to the output video", true, "output.avi", "string");
   cmd.add(video_arg);
   cmd.add(output_arg);
 
-  try {
+  try
+  {
     cmd.parse(argc, argv);
-    
-  } catch (const TCLAP::ArgException & e) {
+  }
+  catch (const TCLAP::ArgException& e)
+  {
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
   }
 
@@ -30,15 +31,16 @@ int main(int argc, char ** argv) {
 
   bool exit = false;
 
-  while(!exit) {
+  while (!exit)
+  {
     cv::Mat img = provider.getNextImg();
     cv::imshow("Display", img);
     char key = cv::waitKey(10);
-    switch(key) {
+    switch (key)
+    {
       case 'q':
         exit = true;
         break;
     }
   }
-
 }

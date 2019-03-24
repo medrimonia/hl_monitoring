@@ -12,27 +12,16 @@
 
 namespace hl_monitoring
 {
+void intrinsicToCV(const IntrinsicParameters& camera_parameters, cv::Mat* camera_matrix,
+                   cv::Mat* distortion_coefficients, cv::Size* img_size);
+void cvToIntrinsic(const cv::Mat& camera_matrix, const cv::Mat& distortion_coefficients, const cv::Size& img_size,
+                   IntrinsicParameters* camera_parameters);
+void pose3DToCV(const Pose3D& pose, cv::Mat* rvec, cv::Mat* tvec);
+void cvToPose3D(const cv::Mat& rvec, const cv::Mat& tvec, Pose3D* pose);
 
+cv::Point2f fieldToImg(const cv::Point3f& pos_in_field, const CameraMetaInformation& camera_information);
 
-void intrinsicToCV(const IntrinsicParameters & camera_parameters,
-                   cv::Mat * camera_matrix,
-                   cv::Mat * distortion_coefficients,
-                   cv::Size * img_size);
-void cvToIntrinsic(const cv::Mat & camera_matrix,
-                   const cv::Mat & distortion_coefficients,
-                   const cv::Size & img_size,
-                   IntrinsicParameters * camera_parameters);
-void pose3DToCV(const Pose3D & pose,
-                cv::Mat * rvec,
-                cv::Mat * tvec);
-void cvToPose3D(const cv::Mat & rvec,
-                const cv::Mat & tvec,
-                Pose3D * pose);
-
-cv::Point2f fieldToImg(const cv::Point3f & pos_in_field,
-                       const CameraMetaInformation & camera_information);
-
-void checkMember(const Json::Value & v, const std::string & key);
+void checkMember(const Json::Value& v, const std::string& key);
 
 /**
  * Place v[key] in 'dst'
@@ -42,19 +31,19 @@ void checkMember(const Json::Value & v, const std::string & key);
  * - v[key] has not the required type
  */
 template <typename T>
-void readVal(const Json::Value & v, const std::string & key, T * dst) = delete;
+void readVal(const Json::Value& v, const std::string& key, T* dst) = delete;
 
 template <>
-void readVal<bool>(const Json::Value & v, const std::string & key, bool * dst);
+void readVal<bool>(const Json::Value& v, const std::string& key, bool* dst);
 
 template <>
-void readVal<int>(const Json::Value & v, const std::string & key, int * dst);
+void readVal<int>(const Json::Value& v, const std::string& key, int* dst);
 
 template <>
-void readVal<double>(const Json::Value & v, const std::string & key, double * dst);
+void readVal<double>(const Json::Value& v, const std::string& key, double* dst);
 
 template <>
-void readVal<std::string>(const Json::Value & v, const std::string & key, std::string * dst);
+void readVal<std::string>(const Json::Value& v, const std::string& key, std::string* dst);
 
 /**
  * Place v[key] in 'dst', if v is not an object or if v does not contain key, do
@@ -64,11 +53,13 @@ void readVal<std::string>(const Json::Value & v, const std::string & key, std::s
  * - v[key] has not the required type
  */
 template <typename T>
-void tryReadVal(const Json::Value & v, const std::string & key, T * dst) {
-  if (!v.isObject() || !v.isMember(key)) { return; }
+void tryReadVal(const Json::Value& v, const std::string& key, T* dst)
+{
+  if (!v.isObject() || !v.isMember(key))
+  {
+    return;
+  }
   readVal(v, key, dst);
 }
 
-
-
-}
+}  // namespace hl_monitoring

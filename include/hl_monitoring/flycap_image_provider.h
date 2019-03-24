@@ -8,55 +8,54 @@
 
 namespace hl_monitoring
 {
-
-class PtGreyException : public std::runtime_error {
+class PtGreyException : public std::runtime_error
+{
 public:
-  PtGreyException(const std::string & msg);
+  PtGreyException(const std::string& msg);
 };
 
-class PtGreyConnectionException : public std::runtime_error {
+class PtGreyConnectionException : public std::runtime_error
+{
 public:
-  PtGreyConnectionException(const std::string & msg);
+  PtGreyConnectionException(const std::string& msg);
 };
-
 
 /**
  * Use 'flycapture' API from FLIR (previously PtGrey) to capture images
  */
-class FlyCapImageProvider : public ImageProvider {
+class FlyCapImageProvider : public ImageProvider
+{
 public:
   /**
    * If output_prefix is not empty, write video during execution and saves
    * MetaInformation when object is closed
    */
-  FlyCapImageProvider(const Json::Value & v,
-                      const std::string & output_prefix = "");
+  FlyCapImageProvider(const Json::Value& v, const std::string& output_prefix = "");
   virtual ~FlyCapImageProvider();
 
-  
   /**
    * Cut current connection if active, then start a new connection
    */
   void reconnectCamera();
 
   void openInputStream();
-  void openOutputStream(const std::string & output_path);
-  
+  void openOutputStream(const std::string& output_path);
+
   void restartStream() override;
 
   CalibratedImage getCalibratedImage(uint64_t time_stamp) override;
 
   void update() override;
-  
+
   cv::Mat getNextImg() override;
 
   bool isStreamFinished() override;
 
   void saveVideoMetaInformation();
 
-  void updateProperty(const FlyCapture2::Property & wished_property);
+  void updateProperty(const FlyCapture2::Property& wished_property);
   void applyWishedProperties();
-  
+
   /**
    * Retrieve current image format
    */
@@ -74,7 +73,6 @@ public:
    */
   void updateImageSettings();
 
-  
   void setImagingMode(FlyCapture2::Mode mode);
 
   /*
@@ -99,7 +97,7 @@ private:
    * Is the image stream started
    */
   bool is_capturing;
-  
+
   /**
    * The video read from the file
    */
@@ -124,7 +122,7 @@ private:
    * Shutter duration [ms]
    */
   double shutter;
-  
+
   /**
    * Camera gain
    */
@@ -137,4 +135,4 @@ private:
   std::string output_prefix;
 };
 
-}
+}  // namespace hl_monitoring

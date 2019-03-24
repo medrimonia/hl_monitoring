@@ -8,7 +8,6 @@
 
 namespace hl_monitoring
 {
-
 /**
  * Manage the monitoring of a game or a replay for the RoboCup humanoid league
  *
@@ -17,21 +16,21 @@ namespace hl_monitoring
  * - Game Controller status
  * - Named video streams with parameters of the cameras (intrinsic+extrinsic)
  */
-class MonitoringManager {
+class MonitoringManager
+{
 public:
   MonitoringManager();
   ~MonitoringManager();
 
-  void loadConfig(const std::string & path);
+  void loadConfig(const std::string& path);
 
-  std::unique_ptr<ImageProvider> buildImageProvider(const Json::Value & v);
+  std::unique_ptr<ImageProvider> buildImageProvider(const Json::Value& v);
 
-  void loadImageProviders(const Json::Value & v);
-  void loadMessageManager(const Json::Value & v);
+  void loadImageProviders(const Json::Value& v);
+  void loadMessageManager(const Json::Value& v);
 
   void setMessageManager(std::unique_ptr<hl_communication::MessageManager> message_manager);
-  void addImageProvider(const std::string & name,
-                        std::unique_ptr<ImageProvider> image_provider);
+  void addImageProvider(const std::string& name, std::unique_ptr<ImageProvider> image_provider);
 
   void update();
 
@@ -43,7 +42,7 @@ public:
    * Returns non-mutable access to the given image provider if it exists.
    * throws std::out_of_range if name is not valid.
    */
-  const ImageProvider & getImageProvider(const std::string & name) const;
+  const ImageProvider& getImageProvider(const std::string& name) const;
 
   std::set<std::string> getImageProvidersNames() const;
 
@@ -51,7 +50,7 @@ public:
    * Return the first time_stamp found in messages and video streams
    */
   uint64_t getStart() const;
-  
+
   bool isGood() const;
 
   bool isLive() const;
@@ -77,7 +76,7 @@ private:
   /**
    * Access to all the channels allowing to retrieve images
    */
-  std::map<std::string,std::unique_ptr<ImageProvider>> image_providers;
+  std::map<std::string, std::unique_ptr<ImageProvider>> image_providers;
 
   /**
    * Path to the output file where all the received messages will be stored upon deletion
@@ -89,7 +88,6 @@ private:
    * Is the monitoring session live or not?
    */
   bool live;
-
 };
 
-}
+}  // namespace hl_monitoring

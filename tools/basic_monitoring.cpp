@@ -16,23 +16,24 @@
 using namespace hl_communication;
 using namespace hl_monitoring;
 
-int main(int argc, char ** argv) {
-  TCLAP::CmdLine cmd("Acquire and display one or multiple streams along with meta-information",
-                     ' ', "0.9");
+int main(int argc, char** argv)
+{
+  TCLAP::CmdLine cmd("Acquire and display one or multiple streams along with meta-information", ' ', "0.9");
 
-  TCLAP::ValueArg<std::string> config_arg("c", "config", "The path to the json configuration file",
-                                          true, "config.json", "string");
-  TCLAP::ValueArg<std::string> field_arg("f", "field", "The path to the json description of the file",
-                                          true, "field.json", "string");
-  TCLAP::SwitchArg verbose_arg("v", "verbose", "If enabled display all messages received",
-                               cmd, false);
+  TCLAP::ValueArg<std::string> config_arg("c", "config", "The path to the json configuration file", true, "config.json",
+                                          "string");
+  TCLAP::ValueArg<std::string> field_arg("f", "field", "The path to the json description of the file", true,
+                                         "field.json", "string");
+  TCLAP::SwitchArg verbose_arg("v", "verbose", "If enabled display all messages received", cmd, false);
   cmd.add(config_arg);
   cmd.add(field_arg);
 
-  try {
+  try
+  {
     cmd.parse(argc, argv);
-    
-  } catch (const TCLAP::ArgException & e) {
+  }
+  catch (const TCLAP::ArgException& e)
+  {
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
   }
 
@@ -45,66 +46,78 @@ int main(int argc, char ** argv) {
 
   // While exit was not explicitly required, run
   uint64_t now = 0;
-  uint64_t dt = 30 * 1000;//[microseconds]
-  if (!manager.isLive()) {
+  uint64_t dt = 30 * 1000;  //[microseconds]
+  if (!manager.isLive())
+  {
     now = manager.getStart();
     manager.setOffset(getSteadyClockOffset());
   }
-  while(manager.isGood()) {
+  while (manager.isGood())
+  {
     manager.update();
-    if (manager.isLive()) {
+    if (manager.isLive())
+    {
       now = getTimeStamp();
-    } else {
+    }
+    else
+    {
       now += dt;
     }
 
     MessageManager::Status status = manager.getStatus(now);
-    std::vector<cv::Scalar> team_colors = {cv::Scalar(255,255,0), cv::Scalar(255,0,255)};
-    std::map<uint32_t,cv::Scalar> colors_by_team;
-    for (int idx = 0; idx < status.gc_message.teams_size(); idx++) {
-      const GCTeamMsg & team_msg = status.gc_message.teams(idx);
-      if (team_msg.has_team_number() && team_msg.has_team_color()) {
+    std::vector<cv::Scalar> team_colors = { cv::Scalar(255, 255, 0), cv::Scalar(255, 0, 255) };
+    std::map<uint32_t, cv::Scalar> colors_by_team;
+    for (int idx = 0; idx < status.gc_message.teams_size(); idx++)
+    {
+      const GCTeamMsg& team_msg = status.gc_message.teams(idx);
+      if (team_msg.has_team_number() && team_msg.has_team_color())
+      {
         uint32_t team_number = team_msg.team_number();
         uint32_t team_color = team_msg.team_color();
         colors_by_team[team_number] = team_colors[team_color];
       }
     }
 
-    if (verbose_arg.getValue()) {
-      std::cout << "Time: " <<  now << std::endl;
-      std::cout << "-> GameController message" << std::endl
-                << status.gc_message.DebugString() << std::endl;
-      for (const auto & robot_entry : status.robot_messages) {
-        std::cout << "-> Message from robot " << robot_entry.first.robot_id()
-                  << " from team " << robot_entry.first.team_id() << std::endl;
-        std::cout << "  -> Estimated pose: "
-                  << robot_entry.second.perception().DebugString() << std::endl;
+    if (verbose_arg.getValue())
+    {
+      std::cout << "Time: " << now << std::endl;
+      std::cout << "-> GameController message" << std::endl << status.gc_message.DebugString() << std::endl;
+      for (const auto& robot_entry : status.robot_messages)
+      {
+        std::cout << "-> Message from robot " << robot_entry.first.robot_id() << " from team "
+                  << robot_entry.first.team_id() << std::endl;
+        std::cout << "  -> Estimated pose: " << robot_entry.second.perception().DebugString() << std::endl;
       }
-      
     }
-    
-    std::map<std::string, CalibratedImage> images_by_source =
-      manager.getCalibratedImages(now);
-    for (const auto & entry : images_by_source) {
+
+    std::map<std::string, CalibratedImage> images_by_source = manager.getCalibratedImages(now);
+    for (const auto& entry : images_by_source)
+    {
       cv::Mat display_img = entry.second.getImg().clone();
-      if (entry.second.isFullySpecified()) {
-        const CameraMetaInformation & camera_information = entry.second.getCameraInformation();
-        field.tagLines(camera_information, &display_img, cv::Scalar(0,0,0), 1, 10);
+      if (entry.second.isFullySpecified())
+      {
+        const CameraMetaInformation& camera_information = entry.second.getCameraInformation();
+        field.tagLines(camera_information, &display_img, cv::Scalar(0, 0, 0), 1, 10);
         // Basic drawing of robot estimated position
-        for (const auto & robot_entry : status.robot_messages) {
+        for (const auto& robot_entry : status.robot_messages)
+        {
           uint32_t team_id = robot_entry.first.team_id();
-          cv::Scalar color = cv::Scalar(0,0,0);
-          if (colors_by_team.count(team_id) == 0) {
-            std::cerr << "Unknown color for team " << team_id
-                      << ": using black (default)" << std::endl;
-          } else {
+          cv::Scalar color = cv::Scalar(0, 0, 0);
+          if (colors_by_team.count(team_id) == 0)
+          {
+            std::cerr << "Unknown color for team " << team_id << ": using black (default)" << std::endl;
+          }
+          else
+          {
             color = colors_by_team[team_id];
           }
-          if (robot_entry.second.has_perception()) {
-            const Perception & perception = robot_entry.second.perception();
-            for (int pos_idx = 0; pos_idx < perception.self_in_field_size(); pos_idx++) {
-              const WeightedPose & weighted_pose = perception.self_in_field(pos_idx);
-              const PositionDistribution & position = weighted_pose.pose().position();
+          if (robot_entry.second.has_perception())
+          {
+            const Perception& perception = robot_entry.second.perception();
+            for (int pos_idx = 0; pos_idx < perception.self_in_field_size(); pos_idx++)
+            {
+              const WeightedPose& weighted_pose = perception.self_in_field(pos_idx);
+              const PositionDistribution& position = weighted_pose.pose().position();
               cv::Point3f pos_in_field(position.x(), position.y(), 0.0);
               cv::Point2f pos_in_img = fieldToImg(pos_in_field, camera_information);
               int circle_size = 10;
@@ -117,6 +130,7 @@ int main(int argc, char ** argv) {
       cv::imshow(entry.first, display_img);
     }
     char key = cv::waitKey(10);
-    if (key == 'q' || key == 'Q') break;
+    if (key == 'q' || key == 'Q')
+      break;
   }
 }

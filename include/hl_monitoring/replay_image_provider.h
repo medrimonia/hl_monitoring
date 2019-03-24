@@ -4,25 +4,22 @@
 
 #include <opencv2/videoio.hpp>
 
-
 namespace hl_monitoring
 {
-
-class ReplayImageProvider : public ImageProvider {
+class ReplayImageProvider : public ImageProvider
+{
 public:
-
   ReplayImageProvider();
-  ReplayImageProvider(const std::string & video_path);
-  ReplayImageProvider(const std::string & video_path,
-                      const std::string & meta_information_path);
+  ReplayImageProvider(const std::string& video_path);
+  ReplayImageProvider(const std::string& video_path, const std::string& meta_information_path);
 
-  void loadVideo(const std::string & video_path);
-  void loadMetaInformation(const std::string & meta_information_path);
+  void loadVideo(const std::string& video_path);
+  void loadMetaInformation(const std::string& meta_information_path);
 
   void restartStream() override;
 
   CalibratedImage getCalibratedImage(uint64_t time_stamp) override;
-  
+
   cv::Mat getNextImg() override;
 
   void update() override;
@@ -39,4 +36,4 @@ private:
   cv::VideoCapture video;
 };
 
-}
+}  // namespace hl_monitoring
