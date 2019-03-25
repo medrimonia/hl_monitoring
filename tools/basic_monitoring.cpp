@@ -54,6 +54,7 @@ int main(int argc, char** argv)
   }
   while (manager.isGood())
   {
+    int64_t loop_start = getTimeStamp();
     manager.update();
     if (manager.isLive())
     {
@@ -63,6 +64,7 @@ int main(int argc, char** argv)
     {
       now += dt;
     }
+    int64_t post_manager_update = getTimeStamp();
 
     MessageManager::Status status = manager.getStatus(now);
     std::vector<cv::Scalar> team_colors = { cv::Scalar(255, 255, 0), cv::Scalar(255, 0, 255) };
@@ -78,6 +80,8 @@ int main(int argc, char** argv)
       }
     }
 
+    int64_t post_get_status = getTimeStamp();
+
     if (verbose_arg.getValue())
     {
       std::cout << "Time: " << now << std::endl;
@@ -91,6 +95,8 @@ int main(int argc, char** argv)
     }
 
     std::map<std::string, CalibratedImage> images_by_source = manager.getCalibratedImages(now);
+    int64_t post_get_images = getTimeStamp();
+
     for (const auto& entry : images_by_source)
     {
       cv::Mat display_img = entry.second.getImg().clone();
@@ -129,8 +135,19 @@ int main(int argc, char** argv)
       }
       cv::imshow(entry.first, display_img);
     }
-    char key = cv::waitKey(10);
+    int64_t post_annotation = getTimeStamp();
+    char key = cv::waitKey(1);
     if (key == 'q' || key == 'Q')
+    {
       break;
+    }
+
+    if (verbose_arg.getValue()) {
+      std::cout << "\tUpdate time: " << ((post_manager_update - loop_start) / 1000) << std::endl;
+      std::cout << "\tGet status time: " << ((post_get_status - post_manager_update) / 1000) << std::endl;
+      std::cout << "\tGet images time: " << ((post_get_images - post_get_status) / 1000) << std::endl;
+      std::cout << "\tManager update time: " << ((post_annotation - post_get_images) / 1000) << std::endl;
+      std::cout << "Total time: " << ((post_annotation - loop_start) / 1000) << " ms" << std::endl;
+    }
   }
 }
