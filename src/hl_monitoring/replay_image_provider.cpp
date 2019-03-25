@@ -64,13 +64,23 @@ void ReplayImageProvider::restartStream()
 
 CalibratedImage ReplayImageProvider::getCalibratedImage(uint64_t time_stamp)
 {
-  setIndex(getIndex(time_stamp));
-
+  int new_index = getIndex(time_stamp);
   cv::Mat img;
-  video.read(img);
-  if (img.empty())
+  if (new_index == -1)
   {
-    throw std::runtime_error(HL_DEBUG + "Blank frame has been read");
+    return CalibratedImage();
+  }
+  else if (new_index == index - 1) // Asking for previous image again
+  {
+    img = last_img;
+  }
+  else
+  {
+    if (new_index != index)
+    {
+      setIndex(new_index);
+    }
+    img = getNextImg();
   }
 
   CameraMetaInformation camera_meta;
@@ -99,15 +109,14 @@ cv::Mat ReplayImageProvider::getNextImg()
     throw std::logic_error("Asking for a new frame while stream is finished");
   }
 
-  cv::Mat img;
-  video.read(img);
+  video >> last_img;
   index++;
-  if (img.empty())
+  if (last_img.empty())
   {
     throw std::runtime_error(HL_DEBUG + "Blank frame at frame: " + std::to_string(index) + "/" +
                              std::to_string(nb_frames));
   }
-  return img;
+  return last_img;
 }
 
 void ReplayImageProvider::update()
@@ -131,9 +140,9 @@ void ReplayImageProvider::setIndex(int new_index)
 
 int ReplayImageProvider::getIndex(uint64_t time_stamp) const
 {
-  if (indices_by_time_stamp.size() == 0)
+  if (indices_by_time_stamp.size() == 0 || indices_by_time_stamp.begin()->first > time_stamp)
   {
-    throw std::runtime_error(HL_DEBUG + "indices_by_time_stamp is empty");
+    return -1;
   }
   auto it = indices_by_time_stamp.upper_bound(time_stamp);
   if (it == indices_by_time_stamp.end() || it->first > time_stamp)

@@ -206,7 +206,10 @@ std::map<std::string, CalibratedImage> MonitoringManager::getCalibratedImages(ui
   std::map<std::string, CalibratedImage> images;
   for (const auto& entry : image_providers)
   {
-    images[entry.first] = entry.second->getCalibratedImage(time_stamp);
+    if (entry.second->getStart() <= time_stamp)
+    {
+      images[entry.first] = entry.second->getCalibratedImage(time_stamp);
+    }
   }
   return images;
 }
