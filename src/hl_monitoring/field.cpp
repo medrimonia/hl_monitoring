@@ -17,7 +17,8 @@ Field::Field()
   /// Expected field sizes
   line_width = 0.05;
   center_radius = 0.75;
-  border_strip_width = 0.70;  // Minimum value
+  border_strip_width_x = 0.70;  // Minimum value
+  border_strip_width_y = 0.70;  // Minimum value
   penalty_mark_dist = 2.10;
   penalty_mark_length = 0.10;
   goal_width = 2.60;
@@ -34,7 +35,8 @@ Json::Value Field::toJson() const
   v["ball_radius"] = ball_radius;
   v["line_width"] = line_width;
   v["center_radius"] = center_radius;
-  v["border_strip_width"] = border_strip_width;
+  v["border_strip_width_x"] = border_strip_width_x;
+  v["border_strip_width_y"] = border_strip_width_y;
   v["penalty_mark_dist"] = penalty_mark_dist;
   v["penalty_mark_length"] = penalty_mark_length;
   v["goal_width"] = goal_width;
@@ -51,7 +53,8 @@ void Field::fromJson(const Json::Value& v)
   readVal(v, "ball_radius", &ball_radius);
   readVal(v, "line_width", &line_width);
   readVal(v, "center_radius", &center_radius);
-  readVal(v, "border_strip_width", &border_strip_width);
+  readVal(v, "border_strip_width_x", &border_strip_width_x);
+  readVal(v, "border_strip_width_y", &border_strip_width_y);
   readVal(v, "penalty_mark_dist", &penalty_mark_dist);
   readVal(v, "penalty_mark_length", &penalty_mark_length);
   readVal(v, "goal_width", &goal_width);
@@ -62,6 +65,9 @@ void Field::fromJson(const Json::Value& v)
   readVal(v, "field_width", &field_width);
   updatePointsOfInterest();
   updateWhiteLines();
+  updateArenaBorders();
+  updateGoals();
+  updatePenaltyMarks();
 }
 
 void Field::loadFile(const std::string& path)
@@ -76,6 +82,18 @@ void Field::loadFile(const std::string& path)
   fromJson(root);
 }
 
+bool Field::isInArena(const cv::Point2f& pos_in_field) const
+{
+  double half_length = getArenaLength() / 2;
+  double half_width = getArenaWidth() / 2;
+  return std::fabs(pos_in_field.x) < half_length && std::fabs(pos_in_field.y) < half_width;
+}
+
+const cv::Point3f & Field::getPoint(const std::string & name) const
+{
+  return points_of_interest.at(name);
+}
+
 const std::map<std::string, cv::Point3f>& Field::getPointsOfInterest() const
 {
   return points_of_interest;
@@ -86,10 +104,36 @@ const std::vector<Field::Segment>& Field::getWhiteLines() const
   return white_lines;
 }
 
+const std::vector<Field::Segment>& Field::getArenaBorders() const
+{
+  return arena_borders;
+}
+
+const std::vector<Field::Segment>& Field::getGoals() const
+{
+  return goals;
+}
+
+const std::vector<cv::Point3f>& Field::getGoalPosts() const
+{
+  return goal_posts;
+}
+
+const std::vector<cv::Point3f>& Field::getPenaltyMarks() const
+{
+  return penalty_marks;
+}
+
 void Field::updatePointsOfInterest()
 {
   points_of_interest.clear();
   points_of_interest["center"] = cv::Point3f(0, 0, 0);
+  double ac_x = field_length / 2 + border_strip_width_x;
+  double ac_y = field_width / 2 + border_strip_width_y;
+  points_of_interest["arena_corner++"] = cv::Point3f(ac_x, ac_y, 0);
+  points_of_interest["arena_corner+-"] = cv::Point3f(ac_x, -ac_y, 0);
+  points_of_interest["arena_corner-+"] = cv::Point3f(-ac_x, ac_y, 0);
+  points_of_interest["arena_corner--"] = cv::Point3f(-ac_x, -ac_y, 0);
   double fc_x = field_length / 2;
   double fc_y = field_width / 2;
   points_of_interest["field_corner++"] = cv::Point3f(fc_x, fc_y, 0);
@@ -119,17 +163,42 @@ void Field::updatePointsOfInterest()
 void Field::updateWhiteLines()
 {
   white_lines.clear();
-  white_lines.push_back({ points_of_interest["field_corner++"], points_of_interest["field_corner+-"] });
-  white_lines.push_back({ points_of_interest["field_corner+-"], points_of_interest["field_corner--"] });
-  white_lines.push_back({ points_of_interest["field_corner--"], points_of_interest["field_corner-+"] });
-  white_lines.push_back({ points_of_interest["field_corner-+"], points_of_interest["field_corner++"] });
-  white_lines.push_back({ points_of_interest["middle_line_t+"], points_of_interest["middle_line_t-"] });
-  white_lines.push_back({ points_of_interest["goal_area_t++"], points_of_interest["goal_area_corner++"] });
-  white_lines.push_back({ points_of_interest["goal_area_corner++"], points_of_interest["goal_area_corner+-"] });
-  white_lines.push_back({ points_of_interest["goal_area_corner+-"], points_of_interest["goal_area_t+-"] });
-  white_lines.push_back({ points_of_interest["goal_area_t-+"], points_of_interest["goal_area_corner-+"] });
-  white_lines.push_back({ points_of_interest["goal_area_corner-+"], points_of_interest["goal_area_corner--"] });
-  white_lines.push_back({ points_of_interest["goal_area_corner--"], points_of_interest["goal_area_t--"] });
+  white_lines.push_back({ getPoint("field_corner++"), getPoint("field_corner+-") });
+  white_lines.push_back({ getPoint("field_corner+-"), getPoint("field_corner--") });
+  white_lines.push_back({ getPoint("field_corner--"), getPoint("field_corner-+") });
+  white_lines.push_back({ getPoint("field_corner-+"), getPoint("field_corner++") });
+  white_lines.push_back({ getPoint("middle_line_t+"), getPoint("middle_line_t-") });
+  white_lines.push_back({ getPoint("goal_area_t++"), getPoint("goal_area_corner++") });
+  white_lines.push_back({ getPoint("goal_area_corner++"), getPoint("goal_area_corner+-") });
+  white_lines.push_back({ getPoint("goal_area_corner+-"), getPoint("goal_area_t+-") });
+  white_lines.push_back({ getPoint("goal_area_t-+"), getPoint("goal_area_corner-+") });
+  white_lines.push_back({ getPoint("goal_area_corner-+"), getPoint("goal_area_corner--") });
+  white_lines.push_back({ getPoint("goal_area_corner--"), getPoint("goal_area_t--") });
+}
+
+void Field::updateArenaBorders()
+{
+  arena_borders = {
+    { getPoint("arena_corner++"), getPoint("field_corner+-") },
+    { getPoint("arena_corner+-"), getPoint("field_corner--") },
+    { getPoint("field_corner--"), getPoint("field_corner-+") },
+    { getPoint("field_corner-+"), getPoint("field_corner++") }
+  };
+}
+
+void Field::updateGoals()
+{
+  goals = {
+    { getPoint("field_corner++"), getPoint("field_corner+-") },
+    { getPoint("field_corner-+"), getPoint("field_corner--") }
+  };
+  goal_posts =
+    { getPoint("field_corner++"), getPoint("field_corner+-"), getPoint("field_corner-+"), getPoint("field_corner--") };
+}
+
+void Field::updatePenaltyMarks()
+{
+  penalty_marks = { getPoint("penalty_mark+"), getPoint("penalty_mark-") };
 }
 
 void Field::tagLines(const CameraMetaInformation& camera_information, cv::Mat* tag_img, const cv::Scalar& line_color,
@@ -173,6 +242,16 @@ void Field::tagLines(const cv::Mat& camera_matrix, const cv::Mat& distortion_coe
       }
     }
   }
+}
+
+double Field::getArenaLength() const
+{
+  return field_length + 2 * border_strip_width_x;
+}
+
+double Field::getArenaWidth() const
+{
+  return field_width + 2 * border_strip_width_y;
 }
 
 }  // namespace hl_monitoring

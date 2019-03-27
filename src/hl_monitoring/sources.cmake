@@ -1,6 +1,7 @@
 set(SOURCES
   calibrated_image.cpp
   field.cpp
+  top_view_drawer.cpp
   image_provider.cpp
   monitoring_manager.cpp
   opencv_image_provider.cpp
