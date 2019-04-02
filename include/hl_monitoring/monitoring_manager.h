@@ -51,6 +51,11 @@ public:
    */
   uint64_t getStart() const;
 
+  /**
+   * Return the time_stamp of the last image or message received
+   */
+  uint64_t getEnd() const;
+
   bool isGood() const;
 
   bool isLive() const;

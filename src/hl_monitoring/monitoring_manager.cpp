@@ -249,6 +249,17 @@ uint64_t MonitoringManager::getStart() const
   return min_ts;
 }
 
+uint64_t MonitoringManager::getEnd() const
+{
+  uint64_t max_ts = std::numeric_limits<uint64_t>::lowest();
+  max_ts = std::max(max_ts, message_manager->getEnd());
+  for (const auto& entry : image_providers)
+  {
+    max_ts = std::max(max_ts, entry.second->getEnd());
+  }
+  return max_ts;
+}
+
 bool MonitoringManager::isGood() const
 {
   for (const auto& entry : image_providers)
